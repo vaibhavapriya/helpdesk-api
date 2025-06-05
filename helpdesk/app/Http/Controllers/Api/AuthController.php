@@ -2,34 +2,38 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;  // Your user API resource
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-            // $request->authenticate();
-            // $request->session()->regenerate();
-
-            // return redirect()->intended(route('dashboard'));
-            //     $credentials = $request->only('email', 'password');
-            // Validate input
         $request->validated();//only data validated by request
 
-        // Get credentials from the request
-        $credentials = [
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-        ];
-
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('home'));
+        // Attempt login
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'message' => 'Invalid credentials.'
+            ], 401);
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Create token (with optional ability scopes)
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Return user resource + token
+        return (new UserResource($user))->additional([
+            'meta' => [
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ],
         ]);
     }
 

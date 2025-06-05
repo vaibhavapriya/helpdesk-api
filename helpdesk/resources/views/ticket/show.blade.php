@@ -83,3 +83,12 @@
     </div>
 
 @endsection
+
+<script>
+    const userid="{{id}}";
+    try{
+      const response= fetch(`/tickets/${userid}`);
+      const data=response.json();
+    }catch{}
+    fetch(`/tickets/${userid}`)
+</script>

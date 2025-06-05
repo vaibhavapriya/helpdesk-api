@@ -12,8 +12,8 @@ Route::view('/knowledgebase','guest.knowledge')->name('kb');
 Route::view('/register','guest.register')->name('register');
 Route::view('/login','guest.login')->name('login');
 Route::view('/forgotpassword','guest.forgotPassword')->name('fp');
-//Router::view('/resetpassword','guest.resetPassword')->name('rp');
-//Router::get('/resetpassword',[ViewController::resetPassword])->name('rp');
+Route::view('/resetpassword','guest.resetPassword')->name('rp');
+//Route::get('/resetpassword',[ViewController::resetPassword])->name('rp');
 
 Route::group(['prefix'=>'myProfile'],function () {
     Route::view('/','user.editprofile');

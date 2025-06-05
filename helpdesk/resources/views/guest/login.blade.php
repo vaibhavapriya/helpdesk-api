@@ -10,9 +10,9 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
 
-    <form method="POST" action="{{ route('login-p') }}">
-        @csrf
+    <form id="l">
 
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="mb-3">
             <label>Email address</label>
             <input type="email" class="form-control" name="email" value="{{ old('email') }}" required autofocus>
@@ -31,7 +31,7 @@
         </div>
 
         <div class="mb-3">
-            <a href="{{ route('password.request') }}">Forgot Password?</a>
+            <a href="{{ route('fp') }}">Forgot Password?</a>
         </div>
 
         <button type="submit" class="btn btn-primary">Login</button>
@@ -42,3 +42,60 @@
     </div>
 </div>
 @endsection
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("l").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        //const formData = new FormData(this);
+
+        const formData = {
+            email: e.target.email.value,
+            password: e.target.password.value,
+            remember: e.target.remember.checked
+        };
+
+        // const response = await fetch('http://127.0.0.1:8000/api/login', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Accept': 'application/json',
+        //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        //     },
+        //     body: JSON.stringify(data)
+        // });
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error(error);
+                alert(error.message || "Login failed");
+                return;
+            }
+
+            const data = await response.json();
+            console.log('Login success:', data);
+
+            // Store token if using token-based API
+            if (data.token) {
+                localStorage.setItem('auth_token', data.token);
+            }
+
+            // Redirect
+            window.location.href = data.redirect || '/dashboard';
+        } catch (err) {
+            console.error("Unexpected error:", err);
+            alert("An unexpected error occurred.");
+        }
+    });
+});
+</script>
