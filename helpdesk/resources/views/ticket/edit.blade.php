@@ -11,7 +11,7 @@
     @endif
     <div class="container">
         <h1>Edit Ticket</h1>
-        <form action="{{ route('tickets.update', $ticket->id) }}" method="POST">
+        <form action="" method="POST">
             @csrf
             @method('PUT')
             <div class="mb-3">

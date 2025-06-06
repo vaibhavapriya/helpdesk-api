@@ -3,7 +3,7 @@
 @include('components.grid-home-client')
 <div class="container mt-5 mb-5 d-flex justify-content-center">
     <div class="card px-1 py-4 col-lg-7">
-        <form action="{{ route('tickets.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="" method="POST" enctype="multipart/form-data">
         @csrf
         @method('POST')
             <div class="card-body">

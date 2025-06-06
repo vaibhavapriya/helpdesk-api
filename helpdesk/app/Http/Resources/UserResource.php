@@ -16,10 +16,23 @@ class UserResource extends JsonResource
     {
         //return parent::toArray($request);
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
+            'success' => true,
+            'data' => [
+                'id' => $this->id,
+                'role' => $this->role, // ensure 'role' exists on your User model
+            ],
             // add other fields you want to expose
         ];
     }
 }
+// {
+//   "success": true,
+//   "data": {...},            // Actual payload, if any
+//   "error": null,            // Or error info if failed
+//   "message": "Optional message for additional context",
+//   "meta": {                 // Pagination info, timestamps, etc.
+//     "page": 1,
+//     "pageSize": 10,
+//     "total": 100
+//   }
+// }

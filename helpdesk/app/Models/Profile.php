@@ -10,10 +10,13 @@ class Profile extends Model
     /** @use HasFactory<\Database\Factories\ProfileFactory> */
     use HasFactory;
 
+    protected $guarded = [];
+
     public function image()
     {
         return $this->morphOne(Image::class, 'imageable');
     }
+    
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;  // Your user API resource
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -39,15 +41,28 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
+        // Password confirmation is usually handled by RegisterRequest validation
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+        $profile = Profile::create([
+            'user_id'=>$user->id,
+            'email' => $request->email,
+        ]);
 
-        Auth::login($user);
+        // Optional: auto-login the user
+        // Auth::login($user);
 
-        //return redirect(route('dashboard'));
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'msg' => "User registered successfully",
+                'user' => $user, // Optional: expose necessary fields only
+            ],
+        ]);
+        
     }
 
     public function resetP(NewPasswordRequest $request)

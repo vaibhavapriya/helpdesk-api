@@ -10,6 +10,8 @@ class Image extends Model
     /** @use HasFactory<\Database\Factories\ImageFactory> */
     use HasFactory;
 
+    protected $guarded = [];
+    
     public function imageable()
     {
         return $this->morphTo();

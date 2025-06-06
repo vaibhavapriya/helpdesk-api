@@ -15,7 +15,19 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        //
+        $profiles = Profile::load(['image'])->latest()->simplePaginate(15);
+        return response()->json([
+        'success' => true,
+        'data' => $profiles->items(),
+        'meta' => [
+            'current_page' => $profiles->currentPage(),
+            'next_page_url' => $profiles->nextPageUrl(),
+            //'last_page' => $tickets->lastPage(),
+            'per_page' => $profiles->perPage(),
+            'prev_page_url' => $profiles->previousPageUrl(),
+            // 'total' => $tickets->total(),only for paginate        
+        ]
+        ]);
     }
 
     /**
@@ -37,11 +49,15 @@ class ProfileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show()
+    public function show(String $id)
     {
-        $profile = User::find(Auth::id());
+        $profile = User::with(['image'])->findOrFail($id);//user_id
+        $this->authorize('view', $ticket);
+        return response()->json([
+        'success' => true,
+        'data' => $profile,
 
-        return view('user.editprofile',compact('profile'));//
+        ]);
     }
 
     /**
@@ -49,7 +65,7 @@ class ProfileController extends Controller
      */
     public function edit(id $profile)
     {
-         return view('user.editprofile');
+        //
     }
 
     /**
@@ -57,7 +73,13 @@ class ProfileController extends Controller
      */
     public function update(UpdateprofileRequest $request, profile $profile)
     {
-        //
+        $this->authorize('view', $profile);
+        $profile = Profile::update([
+            'firstname'=>$request->firstname,
+            'lastname'=>$request->lastname,
+            'phone'=>$request->phone,
+            'email' => $request->email,
+        ]);//with user_id
     }
 
     /**
