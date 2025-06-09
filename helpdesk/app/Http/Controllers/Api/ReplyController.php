@@ -31,14 +31,15 @@ class ReplyController extends Controller
      */
     public function store(StorereplyRequest $request, ticket $ticket)
     {
+        $this->authorize('reply', $ticket);
         $reply = Reply::create([
             'replier_id' => auth()->id(),
             'ticket_id' => $ticket->id,
             'reply' => $request->reply,
         ]);
-        return redirect()->route('tickets.index')->with('success', 'Ticket created successfully');
+        return response()->json(['success' => true,'message' => 'Reply added']);
     }
-
+    
     /**
      * Display the specified resource.
      */

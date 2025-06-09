@@ -28,27 +28,47 @@ class TicketController extends Controller
         ]
         ]);
     }
-    public function indexAdmin()
+    public function indexAdmin(Request $request)
     {
-        $tickets = Ticket::simplePaginate(15);
+        $query = $request->query('query');
+        $status = $request->query('status');
+
+        $ticketsQuery = Ticket::query();
+
+        // Apply search filter
+        if ($query) {
+            $ticketsQuery->where(function ($q) use ($query) {
+                $q->where('name', 'like', '%' . $query . '%')
+                ->orWhere('email', 'like', '%' . $query . '%')
+                ->orWhere('phone', 'like', '%' . $query . '%')
+                ->orWhere('title', 'like', '%' . $query . '%'); // Optional
+            });
+        }
+
+        // Apply status filter
+        if ($status) {
+            $ticketsQuery->where('status', $status);
+        }
+
+        $tickets = $ticketsQuery->latest()->simplePaginate(15);
+
         return response()->json([
-        'success' => true,
-        'data' => $tickets->items(),
-        'meta' => [
-            'current_page' => $tickets->currentPage(),
-            'next_page_url' => $tickets->nextPageUrl(),
-            //'last_page' => $tickets->lastPage(),
-            'per_page' => $tickets->perPage(),
-            'prev_page_url' => $tickets->previousPageUrl(),
-            // 'total' => $tickets->total(),only for paginate        
-        ]
+            'success' => true,
+            'data' => $tickets->items(),
+            'meta' => [
+                'current_page' => $tickets->currentPage(),
+                'next_page_url' => $tickets->nextPageUrl(),
+                'per_page' => $tickets->perPage(),
+                'prev_page_url' => $tickets->previousPageUrl(),
+            ]
         ]);
     }
+
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(TicketRequest $request)
+    public function store(TicketRequest $request)//php artisan storage:link
     {
         $ticket = new Ticket();
         $ticket->title = $request->title;
@@ -61,20 +81,31 @@ class TicketController extends Controller
 
         // Handle attachment
         if ($request->hasFile('attachment')) {
+        try {
             $image = $request->file('attachment');
             $filename = time() . '_' . $image->getClientOriginalName();
             $path = $image->storeAs('uploads', $filename, 'public');
+            if (!$path) {
+                throw new \Exception('File upload failed');
+            }
 
-            // Get the file extension/type
             $extension = $image->getClientOriginalExtension();
 
-            // Save in images table using polymorphic relation
             $ticket->images()->create([
                 'name' => $filename,
                 'link' => $path,
                 'filetype' => strtolower($extension),
             ]);
+        } catch (\Exception $e) {
+            // Optional: Roll back ticket creation or log error
+            \Log::error('Attachment upload failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket created, but file upload failed.'
+            ], 500);
         }
+        }
+
 
         return response()->json(['success' => true,'message' => 'Ticket created successfully'], 201);
     }
@@ -89,22 +120,32 @@ class TicketController extends Controller
         $ticket->requester_id = auth()->id(); 
         $ticket->save(); // Save first to get the ID
 
-        // Handle attachment
         if ($request->hasFile('attachment')) {
+        try {
             $image = $request->file('attachment');
             $filename = time() . '_' . $image->getClientOriginalName();
             $path = $image->storeAs('uploads', $filename, 'public');
+            if (!$path) {
+                throw new \Exception('File upload failed');
+            }
 
-            // Get the file extension/type
             $extension = $image->getClientOriginalExtension();
 
-            // Save in images table using polymorphic relation
             $ticket->images()->create([
                 'name' => $filename,
                 'link' => $path,
                 'filetype' => strtolower($extension),
             ]);
+        } catch (\Exception $e) {
+            // Optional: Roll back ticket creation or log error
+            \Log::error('Attachment upload failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket created, but file upload failed.'
+            ], 500);
         }
+        }
+
 
         return response()->json(['success' => true,'message' => 'Ticket created successfully'], 201);
     }
@@ -117,11 +158,18 @@ class TicketController extends Controller
         // Retrieve the ticket with relationships
         $ticket = Ticket::with(['image', 'replies'])->findOrFail($id);
 
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         // Authorize the user to view this ticket
         $this->authorize('view', $ticket);
 
         // Return the ticket as JSON, including its relationships
-        return response()->json($ticket);
+        return response()->json([
+            'success' => true,
+            'data' => $ticket
+        ]);
     }
 
     /**
@@ -129,50 +177,79 @@ class TicketController extends Controller
      */
     public function update(TicketRequest $request, string $id)
     {
-        $ticket=Ticket::findOrFail($id);
-        // 1. Validate input using `$request->validate()`
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'priority' => 'required|in:low,medium,high',
-            'department' => 'required|string',
-            'attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        $ticket = Ticket::findOrFail($id);
+
         $this->authorize('view', $ticket);
-        // 2. Update the ticket with validated data
+
+        $validated = $request->validated();
+
+        // Update ticket fields
         $ticket->title = $validated['title'];
         $ticket->description = $validated['description'];
         $ticket->priority = $validated['priority'];
         $ticket->department = $validated['department'];
+        $ticket->save();
 
-                // Handle attachment
+        // Handle attachment
         if ($request->hasFile('attachment')) {
             $image = $request->file('attachment');
             $filename = time() . '_' . $image->getClientOriginalName();
             $path = $image->storeAs('uploads', $filename, 'public');
-
-            // Get the file extension/type
             $extension = $image->getClientOriginalExtension();
 
-            // Save in images table using polymorphic relation
-            $ticket->images()->update([
-                'name' => $filename,
-                'link' => $path,
-                'filetype' => strtolower($extension),
-            ]);
+            // Check if image exists, update or create
+            $existingImage = $ticket->images()->first();
+            if ($existingImage) {
+                $existingImage->update([
+                    'name' => $filename,
+                    'link' => $path,
+                    'filetype' => strtolower($extension),
+                ]);
+            } else {
+                $ticket->images()->create([
+                    'name' => $filename,
+                    'link' => $path,
+                    'filetype' => strtolower($extension),
+                ]);
+            }
         }
 
-        $ticket->save(); 
+        return response()->json([
+            'success' => true,
+            'message' => 'Ticket updated successfully',
+            'data' => $ticket->load('images'),
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
+    // public function destroy(string $id)
+    // {
+    //     $ticket=Ticket::findOrFail($id);
+    //     $this->authorize('view', $ticket);
+    //     $ticket->delete();
+    //     return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully');
+    // }
     public function destroy(string $id)
     {
-        $ticket=Ticket::findOrFail($id);
-        $this->authorize('view', $ticket);
+        $ticket = Ticket::with('images')->findOrFail($id);
+
+        $this->authorize('delete', $ticket);
+
+        // Delete associated image files and records
+        foreach ($ticket->images as $image) {
+            \Storage::disk('public')->delete($image->link);
+            $image->delete();
+        }
+
         $ticket->delete();
-        return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ticket deleted successfully'
+        ]);
     }
+
 }

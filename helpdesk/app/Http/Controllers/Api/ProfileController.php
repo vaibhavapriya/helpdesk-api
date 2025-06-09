@@ -13,22 +13,34 @@ class ProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $profiles = Profile::load(['image'])->latest()->simplePaginate(15);
+        $queryParam = $request->query('query');
+
+        $profilesQuery = Profile::with('image')->latest();
+
+        if ($queryParam) {
+            $profilesQuery->where(function ($q) use ($queryParam) {
+                $q->where('name', 'like', '%' . $queryParam . '%')
+                ->orWhere('email', 'like', '%' . $queryParam . '%')
+                ->orWhere('phone', 'like', '%' . $queryParam . '%');
+            });
+        }
+
+        $profiles = $profilesQuery->simplePaginate(15);
+
         return response()->json([
-        'success' => true,
-        'data' => $profiles->items(),
-        'meta' => [
-            'current_page' => $profiles->currentPage(),
-            'next_page_url' => $profiles->nextPageUrl(),
-            //'last_page' => $tickets->lastPage(),
-            'per_page' => $profiles->perPage(),
-            'prev_page_url' => $profiles->previousPageUrl(),
-            // 'total' => $tickets->total(),only for paginate        
-        ]
+            'success' => true,
+            'data' => $profiles->items(),
+            'meta' => [
+                'current_page' => $profiles->currentPage(),
+                'next_page_url' => $profiles->nextPageUrl(),
+                'per_page' => $profiles->perPage(),
+                'prev_page_url' => $profiles->previousPageUrl(),
+            ]
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -61,6 +73,23 @@ class ProfileController extends Controller
     }
 
     /**
+     * Display the specified resource using userId.
+     */
+
+    public function showByUserID(string $id)
+    {
+        $user = User::with('image')->findOrFail($id);
+
+        $this->authorize('view', $user); // Authorize viewing this user
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ]);
+    }
+
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(id $profile)
@@ -71,22 +100,62 @@ class ProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateprofileRequest $request, profile $profile)
+    public function update(UpdateprofileRequest $request, string $id)
     {
-        $this->authorize('view', $profile);
-        $profile = Profile::update([
-            'firstname'=>$request->firstname,
-            'lastname'=>$request->lastname,
-            'phone'=>$request->phone,
+        // 1. Fetch user
+        $user = User::with('profile')->findOrFail($id);
+
+        // 2. Authorize the action (optional: create a 'updateProfile' policy if needed)
+        $this->authorize('update', $user); // or use custom policy logic
+
+        // 3. Update user table
+        $user->update([
+            'name' => $request->name,
             'email' => $request->email,
-        ]);//with user_id
+        ]);
+
+        // 4. Update profile table
+        if ($user->profile) {
+            $user->profile->update([
+                'firstname' => $request->firstname,
+                'lastname' => $request->lastname,
+                'phone' => $request->phone,
+                'email' => $request->email, // if profile also has email
+            ]);
+        } else {
+            // Optionally create profile if missing
+            $user->profile()->create([
+                'firstname' => $request->firstname,
+                'lastname' => $request->lastname,
+                'phone' => $request->phone,
+                'email' => $request->email,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User and profile updated successfully',
+            'data' => $user->fresh('profile')
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(profile $profile)
+    public function destroy(string $id)
     {
         //
     }
+
+    public function getUsersIdAndEmail()
+    {
+        $users = User::select('id', 'email')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $users
+        ]);
+    }
+
 }

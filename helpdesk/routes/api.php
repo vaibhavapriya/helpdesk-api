@@ -18,21 +18,21 @@ Route::post('/forgot-password', [AuthController::class,'forgotP']);
 Route::post('/reset-password/{token}', [AuthController::class,'resetP']) ;
 
 Route::group(['middleware'=>'auth:sanctum'],function () {
-    Route::get('/profile/{id}',[ProfileController::class,'show'])->name('profile');//'auth.login'
-    Route::put('/profile/{id}',[ProfileController::class,'update'])->name('profile-p');
+    Route::get('/profile/{id}',[ProfileController::class,'show'])->name('profile');//'auth.login'//c
+    Route::put('/profile/{id}',[ProfileController::class,'update'])->name('profile-p');//c
     Route::get('/mytickets',[TicketController::class,'index']);//done
-    Route::post('/mytickets',[TicketController::class,'store']);
-    Route::get('/tickets/{id}',[TicketController::class,'show']);
-    Route::put('/tickets/{id}/update',[TicketController::class,'update']);
-    Route::delete('/tickets/{id}/delete',[TicketController::class,'delete']);
-    Route::post('/ticket/{ticket}/comment',[ReplyController::class,'store'])->name('comment');
+    Route::post('/mytickets',[TicketController::class,'store']);//c
+    Route::get('/tickets/{id}',[TicketController::class,'show']);//c
+    Route::put('/tickets/{id}/update',[TicketController::class,'update']);//c
+    Route::delete('/tickets/{id}/delete',[TicketController::class,'delete']);//c
+    Route::post('/ticket/{ticket}/comment',[ReplyController::class,'store'])->name('comment');//c
 });
 
 Route::group(['prefix'=>'admin','middleware'=>['auth:sanctum','role:admin']],function () {//role middleware
-    Route::post('/tickets',[TicketController::class,'storeAdmin']);
-    Route::get('/tickets',[TicketController::class,'indexAdmin']);
-    Route::get('/useridemail',[UserController::class,'storeAdmin']);//show,index
-    Route::get('/profiles',[ProfileController::class,'index']);
+    Route::post('/tickets',[TicketController::class,'storeAdmin']);//c
+    Route::get('/tickets',[TicketController::class,'indexAdmin']);//c add querytring
+    Route::get('/useridemail',[ProfileController::class,'getUsersIdAndEmail']);//show,index
+    Route::get('/profiles',[ProfileController::class,'index']);//c add querystring
 });
 
 
