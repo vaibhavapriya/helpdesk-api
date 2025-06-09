@@ -17,5 +17,24 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
-    })->create();
+        $exceptions->report(function (Throwable $e) {
+            // Avoid logging certain exceptions
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return;
+            }
+
+            try {
+                \App\Models\ErrorLog::create([
+                    'error_message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString(),
+                    'user_id' => auth()->id() ?? null,
+                    'method' => request()->method(),
+                    'route' => request()->path(),
+                ]);
+            } catch (\Throwable $inner) {
+                // Prevent cascading failures — optionally log to file as backup
+                logger()->error('Failed to log error to DB: ' . $inner->getMessage());
+            }
+        });
+    })
+    ->create();

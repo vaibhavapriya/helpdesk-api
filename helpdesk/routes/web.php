@@ -30,3 +30,7 @@ Route::group(['prefix'=>'tickets'],function () {
         return view('ticket.edit',compact('id'));
     });
 });
+
+Route::get('/errortest',function(){
+    throw new \Exception("Something went wrong!");
+});

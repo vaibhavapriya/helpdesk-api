@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreprofileRequest;
 use App\Http\Requests\UpdateprofileRequest;
 use App\Models\Profile;
@@ -13,6 +15,7 @@ class ProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index(Request $request)
     {
         $queryParam = $request->query('query');
@@ -21,7 +24,8 @@ class ProfileController extends Controller
 
         if ($queryParam) {
             $profilesQuery->where(function ($q) use ($queryParam) {
-                $q->where('name', 'like', '%' . $queryParam . '%')
+                $q->where('firstname', 'like', '%' . $queryParam . '%')
+                ->orWhere('lastname', 'like', '%' . $queryParam . '%')
                 ->orWhere('email', 'like', '%' . $queryParam . '%')
                 ->orWhere('phone', 'like', '%' . $queryParam . '%');
             });
@@ -40,6 +44,7 @@ class ProfileController extends Controller
             ]
         ]);
     }
+
 
 
     /**
@@ -63,8 +68,8 @@ class ProfileController extends Controller
      */
     public function show(String $id)
     {
-        $profile = User::with(['image'])->findOrFail($id);//user_id
-        $this->authorize('view', $ticket);
+        $profile = Profile::with(['image'])->findOrFail($id);//user_id
+        $this->authorize('view', $profile);
         return response()->json([
         'success' => true,
         'data' => $profile,
@@ -80,7 +85,7 @@ class ProfileController extends Controller
     {
         $user = User::with('image')->findOrFail($id);
 
-        $this->authorize('view', $user); // Authorize viewing this user
+        //$this->authorize('view', $user); // Authorize viewing this user
 
         return response()->json([
             'success' => true,
@@ -106,7 +111,7 @@ class ProfileController extends Controller
         $user = User::with('profile')->findOrFail($id);
 
         // 2. Authorize the action (optional: create a 'updateProfile' policy if needed)
-        $this->authorize('update', $user); // or use custom policy logic
+        $this->authorize('view', $profile); // or use custom policy logic
 
         // 3. Update user table
         $user->update([

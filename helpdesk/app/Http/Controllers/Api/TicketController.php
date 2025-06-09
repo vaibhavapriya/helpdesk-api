@@ -14,7 +14,7 @@ class TicketController extends Controller
      */
     public function index()
     {
-        $tickets = Ticket::where('requester_id', Auth::id())->latest()->simplePaginate(15);
+        $tickets = Ticket::where('requester_id', Auth::id())->latest()->simplePaginate(15);//->with('replies') 
         return response()->json([
         'success' => true,
         'data' => $tickets->items(),
@@ -38,10 +38,10 @@ class TicketController extends Controller
         // Apply search filter
         if ($query) {
             $ticketsQuery->where(function ($q) use ($query) {
-                $q->where('name', 'like', '%' . $query . '%')
-                ->orWhere('email', 'like', '%' . $query . '%')
-                ->orWhere('phone', 'like', '%' . $query . '%')
-                ->orWhere('title', 'like', '%' . $query . '%'); // Optional
+                $q->where('title', 'like', '%' . $query . '%')
+                ->orWhere('description', 'like', '%' . $query . '%')
+                ->orWhere('id', 'like', '%' . $query . '%')
+                ->orWhere('department', 'like', '%' . $query . '%'); // Optional
             });
         }
 

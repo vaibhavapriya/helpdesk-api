@@ -28,4 +28,5 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Profile::class,ProfilePolicy::class);
         
     }
+    
 }

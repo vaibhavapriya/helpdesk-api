@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StorereplyRequest;
 use App\Http\Requests\UpdatereplyRequest;
 use App\Models\Reply;
@@ -29,16 +30,33 @@ class ReplyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorereplyRequest $request, ticket $ticket)
+    public function store(string $id)
     {
-        $this->authorize('reply', $ticket);
+        // Find the ticket by ID
+        $ticket = Ticket::findOrFail($id);
+
+        // Manually get the 'reply' input from the request
+        $replyContent = request()->input('reply');  
+
+        // Ensure the 'reply' field is provided and not empty
+        if (empty($replyContent)) {
+            return response()->json(['success' => false, 'message' => 'Reply content is required'], 400);
+        }
+
+        // Create the reply record
         $reply = Reply::create([
             'replier_id' => auth()->id(),
             'ticket_id' => $ticket->id,
-            'reply' => $request->reply,
+            'reply' => $replyContent,  // Use the manually extracted reply content
         ]);
-        return response()->json(['success' => true,'message' => 'Reply added']);
+
+        // Return the success response
+        return response()->json([
+            'success' => true,
+            'message' => 'Reply added successfully',
+        ]);
     }
+
     
     /**
      * Display the specified resource.

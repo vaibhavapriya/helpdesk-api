@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Ticket;
-
+use App\Models\Profile;
+use Illuminate\Auth\Access\Response;
 class ProfilePolicy
 {
     /**
