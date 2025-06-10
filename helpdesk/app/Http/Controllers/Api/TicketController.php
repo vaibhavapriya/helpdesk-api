@@ -3,9 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TicketRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Ticket;
+use App\Models\User;
+use App\Mail\TicketCreatedMail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Models\MailConfig;
+
 
 class TicketController extends Controller
 {
@@ -91,7 +99,7 @@ class TicketController extends Controller
 
             $extension = $image->getClientOriginalExtension();
 
-            $ticket->images()->create([
+            $ticket->image()->create([
                 'name' => $filename,
                 'link' => $path,
                 'filetype' => strtolower($extension),
@@ -104,6 +112,28 @@ class TicketController extends Controller
                 'message' => 'Ticket created, but file upload failed.'
             ], 500);
         }
+        }
+
+        //Send email
+        try {
+            $userEmail = auth()->user()->email;
+
+            $activeMail = \App\Models\MailConfig::where('active', true)->first();
+            config([
+                'mail.mailers.smtp.host' => $activeMail->host,
+                'mail.mailers.smtp.port' => $activeMail->port,
+                'mail.mailers.smtp.encryption' => $activeMail->encryption,
+                'mail.mailers.smtp.username' => $activeMail->username,
+                'mail.mailers.smtp.password' => $activeMail->password, // decrypt if encrypted
+                'mail.from.address' => $activeMail->mail_from_address,
+                'mail.from.name' => $activeMail->mail_from_name,
+            ]);
+
+            Mail::mailer('smtp')->to($userEmail)->send(new TicketCreatedMail($ticket));
+
+            return response()->json(['success' => true,'message' => 'Ticket created successfully and mail sent'], 201);
+        } catch (\Exception $e) {
+            \Log::error('Mail failed: ' . $e->getMessage());
         }
 
 
@@ -117,7 +147,7 @@ class TicketController extends Controller
         $ticket->priority = $request->priority;
         $ticket->status = 'open';
         $ticket->department = $request->department;
-        $ticket->requester_id = auth()->id(); 
+        $ticket->requester_id = $request->requester_id; 
         $ticket->save(); // Save first to get the ID
 
         if ($request->hasFile('attachment')) {
@@ -131,7 +161,7 @@ class TicketController extends Controller
 
             $extension = $image->getClientOriginalExtension();
 
-            $ticket->images()->create([
+            $ticket->image()->create([
                 'name' => $filename,
                 'link' => $path,
                 'filetype' => strtolower($extension),
@@ -146,6 +176,28 @@ class TicketController extends Controller
         }
         }
 
+        try {
+            $requester_id = $request->input('requester_id'); 
+            $user=User::findorfail($requester_id);
+            $userEmail = $user->email;
+
+            $activeMail = \App\Models\MailConfig::where('active', true)->first();
+            config([
+                'mail.mailers.smtp.host' => $activeMail->host,
+                'mail.mailers.smtp.port' => $activeMail->port,
+                'mail.mailers.smtp.encryption' => $activeMail->encryption,
+                'mail.mailers.smtp.username' => $activeMail->username,
+                'mail.mailers.smtp.password' => $activeMail->password, // decrypt if encrypted
+                'mail.from.address' => $activeMail->mail_from_address,
+                'mail.from.name' => $activeMail->mail_from_name,
+            ]);
+
+            Mail::mailer('smtp')->to($userEmail)->send(new TicketCreatedMail($ticket));
+
+            return response()->json(['success' => true,'message' => 'Ticket created successfully and mail sent'], 201);
+        } catch (\Exception $e) {
+            \Log::error('Mail failed: ' . $e->getMessage());
+        }
 
         return response()->json(['success' => true,'message' => 'Ticket created successfully'], 201);
     }
@@ -175,38 +227,39 @@ class TicketController extends Controller
     /**
      * Update the specified resource in storage.
      */
+
     public function update(TicketRequest $request, string $id)
     {
         $ticket = Ticket::findOrFail($id);
 
-        $this->authorize('view', $ticket);
+        $this->authorize('update', $ticket);
 
         $validated = $request->validated();
 
-        // Update ticket fields
-        $ticket->title = $validated['title'];
-        $ticket->description = $validated['description'];
-        $ticket->priority = $validated['priority'];
-        $ticket->department = $validated['department'];
-        $ticket->save();
+        $ticket->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'priority' => $validated['priority'],
+            'department' => $validated['department'],
+        ]);
 
-        // Handle attachment
         if ($request->hasFile('attachment')) {
             $image = $request->file('attachment');
-            $filename = time() . '_' . $image->getClientOriginalName();
+            $filename = Str::uuid() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('uploads', $filename, 'public');
             $extension = $image->getClientOriginalExtension();
 
-            // Check if image exists, update or create
-            $existingImage = $ticket->images()->first();
+            $existingImage = $ticket->image()->first();
+
             if ($existingImage) {
+                Storage::disk('public')->delete($existingImage->link);
                 $existingImage->update([
                     'name' => $filename,
                     'link' => $path,
                     'filetype' => strtolower($extension),
                 ]);
             } else {
-                $ticket->images()->create([
+                $ticket->image()->create([
                     'name' => $filename,
                     'link' => $path,
                     'filetype' => strtolower($extension),
@@ -217,31 +270,22 @@ class TicketController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Ticket updated successfully',
-            'data' => $ticket->load('images'),
+            //'data' => $ticket->load('image'), // or 'images' depending on your relationship
         ]);
     }
-
-
     /**
      * Remove the specified resource from storage.
      */
-    // public function destroy(string $id)
-    // {
-    //     $ticket=Ticket::findOrFail($id);
-    //     $this->authorize('view', $ticket);
-    //     $ticket->delete();
-    //     return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully');
-    // }
     public function destroy(string $id)
     {
-        $ticket = Ticket::with('images')->findOrFail($id);
+        $ticket = Ticket::with('image')->findOrFail($id);
 
-        $this->authorize('delete', $ticket);
+        $this->authorize('view', $ticket);
 
         // Delete associated image files and records
-        foreach ($ticket->images as $image) {
-            \Storage::disk('public')->delete($image->link);
-            $image->delete();
+        if ($ticket->image) {
+            \Storage::disk('public')->delete($ticket->image->link);
+            $ticket->image->delete();
         }
 
         $ticket->delete();

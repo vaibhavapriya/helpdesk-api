@@ -68,7 +68,7 @@ class ProfileController extends Controller
      */
     public function show(String $id)
     {
-        $profile = Profile::with(['image'])->findOrFail($id);//user_id
+        $profile = Profile::with('image')->where('user_id', $id)->firstOrFail();$profile = Profile::with(['image'])->findOrFail($id);//user_id
         $this->authorize('view', $profile);
         return response()->json([
         'success' => true,
@@ -109,6 +109,7 @@ class ProfileController extends Controller
     {
         // 1. Fetch user
         $user = User::with('profile')->findOrFail($id);
+        //$profile = Profile::with('image')->where('user_id', $id)->firstOrFail();
 
         // 2. Authorize the action (optional: create a 'updateProfile' policy if needed)
         $this->authorize('view', $profile); // or use custom policy logic
