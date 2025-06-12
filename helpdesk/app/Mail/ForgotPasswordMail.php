@@ -58,7 +58,7 @@ class ForgotPasswordMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.forgot_password',
         );
     }
 
@@ -71,13 +71,5 @@ class ForgotPasswordMail extends Mailable
     {
         return [];
     }
-    public function buildOLd()
-    {
-        $activeMail = \App\Models\MailConfig::where('active', true)->first();
 
-        return $this->from($activeMail->mail_from_address, $activeMail->mail_from_name)
-                    ->subject('Forgot Passward for the account: ' . $this->user->email)
-                    ->view('emails.forgot_password')
-                    ->with(['user' => $this->user]);
-    }
 }

@@ -11,4 +11,6 @@ class MailConfig extends Model
     use HasFactory;
 
     protected $table = 'mailconfigs';
+
+    protected $fillable = ['active'];
 }

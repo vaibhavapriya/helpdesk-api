@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Models\Profile;
 use Illuminate\Http\Request;
 use App\Mail\ForgotPasswordMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\MailConfig;
 
 class AuthController extends Controller
 {
@@ -112,6 +114,16 @@ class AuthController extends Controller
 
             // You can store this token manually if needed, or just send it in the email
             // Optionally: store for logging/audit
+            $activeMail = \App\Models\MailConfig::where('active', true)->first();
+            config([
+                'mail.mailers.smtp.host' => $activeMail->host,
+                'mail.mailers.smtp.port' => $activeMail->port,
+                'mail.mailers.smtp.encryption' => $activeMail->encryption,
+                'mail.mailers.smtp.username' => $activeMail->username,
+                'mail.mailers.smtp.password' => $activeMail->password, // decrypt if encrypted
+                'mail.from.address' => $activeMail->mail_from_address,
+                'mail.from.name' => $activeMail->mail_from_name,
+            ]);
 
             // Send mail with token
             Mail::to($user->email)->send(new ForgotPasswordMail($user, $token));

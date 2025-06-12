@@ -109,6 +109,7 @@ class ProfileController extends Controller
     {
         // 1. Fetch user
         $user = User::with('profile')->findOrFail($id);
+        $profile = $user->profile;
         //$profile = Profile::with('image')->where('user_id', $id)->firstOrFail();
 
         // 2. Authorize the action (optional: create a 'updateProfile' policy if needed)
@@ -116,7 +117,7 @@ class ProfileController extends Controller
 
         // 3. Update user table
         $user->update([
-            'name' => $request->name,
+            'name' => $request->firstname." ".$request->lastname,
             'email' => $request->email,
         ]);
 

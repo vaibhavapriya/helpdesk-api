@@ -228,13 +228,19 @@ class TicketController extends Controller
      * Update the specified resource in storage.
      */
 
-    public function update(TicketRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
         $ticket = Ticket::findOrFail($id);
 
-        $this->authorize('update', $ticket);
+        $this->authorize('view', $ticket);
 
-        $validated = $request->validated();
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'priority' => 'required|string',
+            'department' => 'required|string',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx',
+        ]);
 
         $ticket->update([
             'title' => $validated['title'],
