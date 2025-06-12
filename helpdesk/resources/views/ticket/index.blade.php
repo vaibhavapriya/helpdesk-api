@@ -29,11 +29,13 @@
 
 
 <script>
+
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
+ 
 document.addEventListener("DOMContentLoaded", function () {
     console.log('tickets loading');
     const tableBody = document.getElementById('tickets-table-body');
     const pagination = document.getElementById('pagination');
-    const token = 'Bearer ' + localStorage.getItem('auth_token');
 
     if (!localStorage.getItem('auth_token')) {
         alert('You are not logged in. Redirecting to login.');
@@ -75,31 +77,11 @@ document.addEventListener("DOMContentLoaded", function () {
             alert('Failed to fetch tickets.');
         }
     };
-
-    const renderTickets = (tickets) => {
-        tableBody.innerHTML = tickets.length
-            ? tickets.map(ticket => `
-                <tr>
-                    <td>${ticket.id}</td>
-                    <td>${ticket.title}</td>
-                    <td>${capitalize(ticket.priority)}</td>
-                    <td>${capitalize(ticket.status)}</td>
-                    <td>${ticket.department}</td>
-                    <td>
-                        <a href="/tickets/${ticket.id}" class="btn btn-info btn-sm">View</a>
-                        <a href="/tickets/${ticket.id}/edit" class="btn btn-warning btn-sm">Edit</a>
-                        <button class="btn btn-danger btn-sm" onclick="deleteTicket(${ticket.id})">Delete</button>
-                    </td>
-                </tr>
-            `).join('')
-            : '<tr><td colspan="6" class="text-center">No tickets found.</td></tr>';
-    };
-
     const deleteTicket = async (id) => {
-        if (!confirm('Delete this ticket?')) return;
+        // if (!confirm('Delete this ticket?')) return;
 
         try {
-            const response = await fetch(`/api/tickets/${id}`, {
+            const response = await fetch(`/api/tickets/${id}/delete`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
@@ -121,7 +103,34 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    const renderPagination = (meta) => {
+    const renderTickets = (tickets) => {
+        tableBody.innerHTML = tickets.length
+            ? tickets.map(ticket => `
+                <tr data-id="${ticket.id}">
+                    <td>${ticket.id}</td>
+                    <td>${ticket.title}</td>
+                    <td>${capitalize(ticket.priority)}</td>
+                    <td>${capitalize(ticket.status)}</td>
+                    <td>${ticket.department}</td>
+                    <td>
+                        <a href="/tickets/${ticket.id}/edit" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm btn-delete">Delete</button>
+                    </td>
+                </tr>
+            `).join('')
+            : '<tr><td colspan="6" class="text-center">No tickets found.</td></tr>';
+
+        // Add event listeners to delete buttons
+        tableBody.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                event.stopPropagation();
+                const id = event.target.closest('tr').dataset.id;
+                await deleteTicket(id);
+            });
+        });
+    };
+
+       const renderPagination = (meta) => {
         pagination.innerHTML = '';
 
         if (meta.prev_page_url) {
@@ -176,7 +185,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const capitalize = (str) => str?.trim() ? str.trim()[0].toUpperCase() + str.trim().slice(1) : '';
 
+  
     fetchTickets();
 });
+
 </script>
 

@@ -34,7 +34,7 @@ return [
     |
     */
 
-    'guard' => ['web'],
+    'guard' => ['web'],//in auth we have metioned sanctum so it will token
     // 'guard' => ['web', 'api'],
 
     /*

@@ -2,9 +2,16 @@
 
 @section('content')
 <div class="container my-4">
-    <h1>Ticket Details (API)</h1>
+    <h1 class="mb-4">Your Ticket Details </h1>
 
     <div id="ticket-details"></div>
+
+    <!-- Attachment -->
+    <div class="mb-4">
+        <h3>Attachment:</h3>
+        <div id="attachmentContainer"></div>
+    </div>
+
     <h3 class="text-success mt-5">Replies</h3>
     <ul id="replies-list" class="list-unstyled"></ul>
 
@@ -15,51 +22,80 @@
         </div>
     </form>
 
-    <a href="{{ route('tickets.index') }}" class="btn btn-secondary mt-4">Back to List</a>
+    <a href="/tickets" class="btn btn-secondary mt-4">Back to List</a>
 </div>
 @endsection
 
-@push('scripts')
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const ticketId = "{{ $ticket->id }}";
-        const apiBase = `/api/tickets/${ticketId}`;
-        const token = '{{ csrf_token() }}'; // optional if using Sanctum or JWT
+        const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
+        const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
+        const token = 'Bearer ' + localStorage.getItem('auth_token');
 
         const ticketContainer = document.getElementById("ticket-details");
         const repliesList = document.getElementById("replies-list");
         const replyForm = document.getElementById("reply-form");
         const replyInput = document.getElementById("reply-input");
 
-        // Fetch Ticket Details + Replies
-        fetch(apiBase)
-            .then(res => res.json())
-            .then(ticket => {
+        if (!localStorage.getItem('auth_token')) {
+            alert('You are not logged in. Redirecting to login.');
+            window.location.href = '/login';
+            return;
+        }
+
+        // Fetch Ticket Details
+        const fetchTicket = async () => {
+            try {
+                const res = await fetch(apiBase, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': token
+                    }
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch ticket");
+
+                const data = await res.json();
+                const ticket =data.data;
                 renderTicket(ticket);
                 renderReplies(ticket.replies);
-            })
-            .catch(err => console.error("Fetch error:", err));
+            } catch (err) {
+                console.error("Fetch error:", err);
+                alert("Failed to load ticket.");
+            }
+        };
 
         // Render Ticket Info
         function renderTicket(ticket) {
             ticketContainer.innerHTML = `
-                <div><strong>Title:</strong> ${ticket.title}</div>
+                <h1> ${ticket.title}</h1>
                 <div><strong>Description:</strong> ${ticket.description}</div>
-                <div><strong>Status:</strong> ${ticket.status}</div>
-                <div><strong>Priority:</strong> ${ticket.priority}</div>
+                <div><strong>Status:</strong> ${capitalize(ticket.status)}</div>
+                <div><strong>Priority:</strong> ${capitalize(ticket.priority)}</div>
                 <div><strong>Requester:</strong> ${ticket.requester?.name || 'Anonymous'}</div>
                 ${ticket.filelink ? `<img src="/storage/${ticket.filelink}" class="img-fluid my-2" style="max-width:300px;">` : ''}
             `;
+            
+            const attachmentContainer = document.getElementById('attachmentContainer');
+            if (!ticket.attachment_type) {
+            attachmentContainer.textContent = "No attachment available.";
+            }
+            else {
+            attachmentContainer.innerHTML = `<img src="/project/image.php?id=${ticketId}" 
+                alt="Ticket Attachment" style="max-width: 400px; height: auto;">`;
+            }
         }
 
-        // Recursive reply renderer
+        // Render Replies
         function renderReplies(replies, parent = repliesList) {
+            parent.innerHTML = '';
             replies.forEach(reply => {
                 const li = document.createElement("li");
                 li.classList.add("mb-3");
                 li.innerHTML = `
                     <div class="d-flex">
-                        <img src="${reply.user?.avatar_url || '/default-avatar.jpg'}" width="50" class="rounded-circle me-2">
+                        <img src="${reply.user?.avatar_url || '/images/manager_9193795.png'}" width="50" class="rounded-circle me-2">
                         <div>
                             <strong>${reply.user?.name || 'Anonymous'}</strong>
                             <small class="text-muted"> — ${new Date(reply.created_at).toLocaleDateString()}</small>
@@ -70,7 +106,7 @@
 
                 parent.appendChild(li);
 
-                if (reply.children && reply.children.length) {
+                if (reply.children?.length) {
                     const ul = document.createElement("ul");
                     ul.classList.add("ms-4", "list-unstyled");
                     li.appendChild(ul);
@@ -80,36 +116,36 @@
         }
 
         // Submit Reply
-        replyForm.addEventListener("submit", e => {
+        replyForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            fetch(`${apiBase}/replies`, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    reply: replyInput.value
-                })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error("Failed to post reply");
-                return res.json();
-            })
-            .then(newReply => {
-                repliesList.innerHTML = ''; // Clear and reload all
-                return fetch(apiBase).then(r => r.json());
-            })
-            .then(updatedTicket => {
-                renderReplies(updatedTicket.replies);
+            try {
+                const res = await fetch(`${apiBase}/comment`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({ reply: replyInput.value })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Reply failed");
+                }
+
                 replyInput.value = '';
-            })
-            .catch(err => alert("Reply failed: " + err.message));
+                fetchTicket(); // refresh replies
+            } catch (err) {
+                console.error("Reply error:", err);
+                alert(err.message);
+            }
         });
+
+        const capitalize = (str) => str?.trim() ? str.trim()[0].toUpperCase() + str.trim().slice(1) : '';
+
+        fetchTicket();
     });
 </script>
-@endpush
 
-<!--  -->
