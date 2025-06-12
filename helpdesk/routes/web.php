@@ -18,6 +18,9 @@ Route::view('/resetpassword','guest.resetPassword')->name('rp');
 Route::group(['prefix'=>'myProfile'],function () {
     Route::view('/','user.editprofile');
     Route::view('/edit','user.editprofile');
+    // Route::get('/{id}',function($id){
+    //     return view('user.editprofile',compact('id'));
+    // });
 });
 
 Route::group(['prefix'=>'tickets'],function () {
