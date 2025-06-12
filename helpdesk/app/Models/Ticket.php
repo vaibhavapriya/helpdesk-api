@@ -14,6 +14,7 @@ class Ticket extends Model
         'title', 'description', 'priority', 'filetype', 'filelink',
         'status', 'department', 'requester_id', 'last_reply', 'last_replier',
     ];
+    // protected $hidden = ['imaage', 'requester', 'replies']; 
 
     public function image()
     {

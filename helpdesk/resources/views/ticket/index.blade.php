@@ -1,159 +1,182 @@
 @extends('components.layouts.app.client')
-@section('content')
-    <div class="container">
-        <h1>Ticket List</h1>
-        <table class="table mt-3">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Department</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="tickets-table-body">
-                <!-- JS will insert ticket rows here -->
-            </tbody>
-        </table>
 
-        <!-- Pagination buttons container -->
-        <nav>
-            <ul class="pagination" id="pagination">
-                <!-- JS will insert pagination links here -->
-            </ul>
-        </nav>
-    </div>
+@section('content')
+<div class="container">
+    <h1>Ticket List</h1>
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Department</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tickets-table-body">
+            <!-- JS inserts ticket rows here -->
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination" id="pagination">
+            <!-- JS inserts pagination here -->
+        </ul>
+    </nav>
+</div>
 @endsection
 
-@section('scripts')
+
 <script>
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", function () {
+    console.log('tickets loading');
     const tableBody = document.getElementById('tickets-table-body');
     const pagination = document.getElementById('pagination');
-    const apiUrlBase = 'http://127.0.0.1:8000/api/tickets';
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
 
-    async function fetchTickets(url = apiUrlBase) {
+    if (!localStorage.getItem('auth_token')) {
+        alert('You are not logged in. Redirecting to login.');
+        window.location.href = '/login';
+        return;
+    }
+
+    const fetchTickets = async () => {
         try {
-            const response = await fetch(url, {
+            const response = await fetch('http://127.0.0.1:8000/api/mytickets', {
                 headers: {
                     'Accept': 'application/json',
-                    'Authorization': 'Bearer 4|M1XdDP0CbSWuzt3Mh7VYe9dJQHn0syJSmvM4dElLcb0f4c23',
+                    'Authorization': token
                 }
             });
 
-            console.log('Status:', response.status);
-            console.log('Content-Type:', response.headers.get('content-type'));
-
-            if (!response.ok) {
-                // If content-type is JSON, parse error message
-                if (response.headers.get('content-type')?.includes('application/json')) {
-                    const error = await response.json();
-                    alert(error.message || 'Failed to fetch tickets');
-                } else {
-                    // For HTML error page, just alert status text
-                    const text = await response.text();
-                    alert('Error: ' + response.status + '\n' + text.substring(0, 200) + '...');
-                }
+            if (response.status === 401) {
+                alert('Session expired. Please login again.');
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login';
                 return;
             }
 
-            const result = await response.json();
-            console.log('API response data:', result);
-            renderTickets(result.data);
-            renderPagination(result.meta);
-        } catch (err) {
-            console.error(err);
-            alert('An unexpected error occurred.');
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type');
+                const errorMessage = contentType?.includes('application/json')
+                    ? (await response.json()).message || 'Fetch error'
+                    : 'HTTP error ' + response.status;
+
+                return alert(errorMessage);
+            }
+
+            const data = await response.json();
+            console.log('tickets:', data);
+            renderTickets(data.data);
+            renderPagination(data.meta);
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            alert('Failed to fetch tickets.');
         }
-    }
+    };
 
-    function renderTickets(tickets) {
-        tableBody.innerHTML = ''; // Clear current rows
-        if (!tickets.length) {
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No tickets found.</td></tr>';
-            return;
+    const renderTickets = (tickets) => {
+        tableBody.innerHTML = tickets.length
+            ? tickets.map(ticket => `
+                <tr>
+                    <td>${ticket.id}</td>
+                    <td>${ticket.title}</td>
+                    <td>${capitalize(ticket.priority)}</td>
+                    <td>${capitalize(ticket.status)}</td>
+                    <td>${ticket.department}</td>
+                    <td>
+                        <a href="/tickets/${ticket.id}" class="btn btn-info btn-sm">View</a>
+                        <a href="/tickets/${ticket.id}/edit" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTicket(${ticket.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('')
+            : '<tr><td colspan="6" class="text-center">No tickets found.</td></tr>';
+    };
+
+    const deleteTicket = async (id) => {
+        if (!confirm('Delete this ticket?')) return;
+
+        try {
+            const response = await fetch(`/api/tickets/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': token
+                }
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                alert(err.message || 'Failed to delete ticket');
+                return;
+            }
+
+            alert('Ticket deleted');
+            fetchTickets(); // Refresh table
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Unexpected error occurred.');
         }
-        tickets.forEach(ticket => {
-            const tr = document.createElement('tr');
-            tr.style.cursor = "pointer";
-            tr.onclick = () => window.location.href = `/tickets/${ticket.id}`;
+    };
 
-            tr.innerHTML = `
-                <td>${ticket.id}</td>
-                <td>${ticket.title}</td>
-                <td>${capitalize(ticket.priority)}</td>
-                <td>${capitalize(ticket.status)}</td>
-                <td>${ticket.department}</td>
-                <td>
-                    <a href="/tickets/${ticket.id}/edit" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="/tickets/${ticket.id}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this ticket?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                </td>
-            `;
-            tableBody.appendChild(tr);
-        });
-    }
-
-    function renderPagination(meta) {
+    const renderPagination = (meta) => {
         pagination.innerHTML = '';
 
-        // Previous page
         if (meta.prev_page_url) {
-            const liPrev = createPageItem('Previous', meta.prev_page_url);
-            pagination.appendChild(liPrev);
+            pagination.appendChild(createPageItem('Previous', meta.prev_page_url));
         } else {
             pagination.appendChild(createDisabledPageItem('Previous'));
         }
 
-        // Current page indicator
-        const liCurrent = document.createElement('li');
-        liCurrent.classList.add('page-item', 'active');
-        liCurrent.innerHTML = `<span class="page-link">${meta.current_page}</span>`;
-        pagination.appendChild(liCurrent);
+        for (let i = 1; i <= meta.last_page; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === meta.current_page ? 'active' : ''}`;
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.textContent = i;
+            a.href = '#';
+            a.onclick = (e) => {
+                e.preventDefault();
+                fetchTickets(`${apiBase}?page=${i}`);
+            };
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
 
-        // Next page
         if (meta.next_page_url) {
-            const liNext = createPageItem('Next', meta.next_page_url);
-            pagination.appendChild(liNext);
+            pagination.appendChild(createPageItem('Next', meta.next_page_url));
         } else {
             pagination.appendChild(createDisabledPageItem('Next'));
         }
-    }
+    };
 
-    function createPageItem(text, url) {
+    const createPageItem = (text, url) => {
         const li = document.createElement('li');
         li.classList.add('page-item');
         const a = document.createElement('a');
         a.classList.add('page-link');
         a.href = '#';
         a.textContent = text;
-        a.addEventListener('click', (e) => {
+        a.onclick = (e) => {
             e.preventDefault();
             fetchTickets(url);
-        });
+        };
         li.appendChild(a);
         return li;
-    }
+    };
 
-    function createDisabledPageItem(text) {
+    const createDisabledPageItem = (text) => {
         const li = document.createElement('li');
         li.classList.add('page-item', 'disabled');
         li.innerHTML = `<span class="page-link">${text}</span>`;
         return li;
-    }
+    };
 
-    function capitalize(str) {
-        if (!str) return '';
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+    const capitalize = (str) => str?.trim() ? str.trim()[0].toUpperCase() + str.trim().slice(1) : '';
 
-    // Initial fetch
     fetchTickets();
 });
 </script>
-@endsection
+

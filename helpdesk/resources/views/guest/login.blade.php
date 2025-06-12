@@ -83,15 +83,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const data = await response.json();
-            console.log('Login success:', data);
+            // console.log('Login:', data);
 
             // Store token if using token-based API
-            if (data.token) {
-                localStorage.setItem('auth_token', data.token);
+            if (data.success===true) {
+                localStorage.setItem('auth_token', data.meta.token);
+                localStorage.setItem('user_id', data.data.id);
+                localStorage.setItem('user_role', data.data.role);
+                //Redirect
+                window.location.href = data.redirect || '/';
             }
 
-            // Redirect
-            window.location.href = data.redirect || '/dashboard';
+
         } catch (err) {
             console.error("Unexpected error:", err);
             alert("An unexpected error occurred.");

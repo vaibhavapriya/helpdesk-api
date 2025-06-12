@@ -20,9 +20,10 @@ class TicketController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tickets = Ticket::where('requester_id', Auth::id())->latest()->simplePaginate(15);//->with('replies') 
+        $user = $request->user(); 
+        $tickets = Ticket::where('requester_id', $user->id )->latest()->simplePaginate(15);//->with('replies') 
         return response()->json([
         'success' => true,
         'data' => $tickets->items(),

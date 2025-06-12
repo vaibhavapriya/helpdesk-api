@@ -135,10 +135,17 @@ class AuthController extends Controller
         }
     }
 
-    public function destroy()
+    // public function destroy()
+    // {
+    //     Auth::guard('web')->logout();
+    //     return redirect(route('login'));
+    // }
+
+    public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-        return redirect(route('login'));
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logged out']);
     }
 
     public function updatePassword(Request $request, string $id)

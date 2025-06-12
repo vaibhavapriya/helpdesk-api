@@ -16,6 +16,7 @@
       <!-- Menu -->
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
        <ul class="navbar-nav">
+        <!-- (!isset(getItem['auth_token']) || empty(getItem['auth_token'])) -->
         @guest
           <li class="nav-item">
             <a class="nav-link" href="{{ url('tickets/create') }}">SUBMIT TICKET</a>
@@ -63,3 +64,22 @@
 
   </div>
 </nav>
+
+<!-- <script>
+  const token = localStorage.getItem('auth_token')||'';
+
+  fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+      }
+  }).then(() => {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_role');
+      window.location.href = '/login';
+      
+  });
+
+</script> -->

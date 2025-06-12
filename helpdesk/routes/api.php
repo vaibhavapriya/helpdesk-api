@@ -19,6 +19,7 @@ Route::post('/forgot-password', [AuthController::class,'forgotP']);
 Route::post('/reset-password/{token}', [AuthController::class,'resetP']) ;
 
 Route::group(['middleware'=>'auth:sanctum'],function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile/{id}',[ProfileController::class,'show'])->name('profile');//done
     Route::put('/profile/{id}',[ProfileController::class,'update'])->name('profile-p');//d without image
     Route::put('/profile/{id}/updatePassword',[AuthController::class,'upadetePassword'])->name('profile-p');
