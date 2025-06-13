@@ -49,6 +49,7 @@ Route::group(['prefix'=>'admin'],function () {
         })->name('aticketedit');
     });
     Route::view('/profiles','admin.profiles')->name('profiles');
+    Route::view('/profile','admin.profile')->name('profile');
     Route::view('/errorlogs','admin.errorlog')->name('errorlog');
     Route::view('/mailconfig','admin.mailconfig')->name('mail');
     //kb,ticketshowedit,profileshowedit/myProfile
