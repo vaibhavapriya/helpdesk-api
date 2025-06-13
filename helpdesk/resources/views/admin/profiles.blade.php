@@ -37,212 +37,132 @@
     </nav>
 @endsection
 
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const token = 'Bearer ' + localStorage.getItem('auth_token');
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
+    let currentUserQuery = '';
+    let currentUserPageUrl = 'http://127.0.0.1:8000/api/admin/profiles';
 
-  async function fetchUsers() {
-    const statusDiv = document.getElementById('status');
-    const tableBody = document.getElementById('userTableBody');
+    function debounce(func, delay) {
+      let timer;
+      return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
 
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/admin/profiles', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': token
-        }
-      });
+    async function fetchUsers(url = null) {
+      const tableBody = document.getElementById('userTableBody');
+      const statusDiv = document.getElementById('status');
+      const pagination = document.getElementById('pagination');
 
-      const result = await response.json();
-      tableBody.innerHTML = '';
-      statusDiv.textContent = '';
+      const baseUrl = url || 'http://127.0.0.1:8000/api/admin/profiles';
+      const queryParams = new URLSearchParams();
 
-      if (result.success) {
-        const users = result.data;
+      if (currentUserQuery.trim()) {
+        queryParams.append('query', currentUserQuery.trim());
+      }
 
-        if (!users.length) {
-          statusDiv.textContent = "No users found.";
-          return;
-        }
+      const finalUrl = baseUrl.includes('?')
+        ? `${baseUrl}&${queryParams.toString()}`
+        : `${baseUrl}?${queryParams.toString()}`;
 
-        users.forEach(user => {
-          const row = document.createElement('tr');
-
-          row.innerHTML = `
-            <td>${user.userid}</td>
-            <td><span class="editable" data-field="firstname">${user.firstname}</span></td>
-            <td><span class="editable" data-field="lastname">${user.lastname}</span></td>
-            <td><span class="editable" data-field="role">${user.role}</span></td>
-            <td><span class="editable" data-field="email">${user.email}</span></td>
-            <td><span class="editable" data-field="phone">${user.phone}</span></td>
-            <td><i class="fa-solid fa-pen-to-square edit-icon" onclick="enableEditing(this, ${user.userid})"></i></td>
-            <td><i class="fa-solid fa-trash text-danger" onclick="deleteUser(${user.userid})"></i></td>
-          `;
-
-          tableBody.appendChild(row);
+      try {
+        const response = await fetch(finalUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': token
+          }
         });
-        renderPagination(result.meta);
-      } else {
+
+        const result = await response.json();
+        tableBody.innerHTML = '';
+        statusDiv.textContent = '';
+
+        if (result.success) {
+          const users = result.data;
+
+          if (!users.length) {
+            statusDiv.textContent = "No users found.";
+            return;
+          }
+
+          users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${user.user_id}</td>
+              <td><span class="editable" data-field="firstname">${user.firstname}</span></td>
+              <td><span class="editable" data-field="lastname">${user.lastname}</span></td>
+              <td><span class="editable" data-field="role">${user.role}</span></td>
+              <td><span class="editable" data-field="email">${user.email}</span></td>
+              <td><span class="editable" data-field="phone">${user.phone}</span></td>
+              <td><i class="fa-solid fa-pen-to-square edit-icon" onclick="enableEditing(this, ${user.userid})"></i></td>
+              <td><i class="fa-solid fa-trash text-danger" onclick="deleteUser(${user.userid})"></i></td>
+            `;
+            tableBody.appendChild(row);
+          });
+
+          renderPagination(result.meta);
+          currentUserPageUrl = finalUrl;
+        } else {
+          statusDiv.className = 'text-danger';
+          statusDiv.textContent = result.message || 'Something went wrong.';
+        }
+      } catch (error) {
+        console.error(error);
         statusDiv.className = 'text-danger';
-        statusDiv.textContent = result.message || 'Something went wrong.';
+        statusDiv.textContent = 'Server error. Please try again.';
       }
-    } catch (error) {
-      console.error(error);
-      statusDiv.className = 'text-danger';
-      statusDiv.textContent = 'Server error. Please try again.';
     }
-  }
 
-  window.enableEditing = function (icon, userid) {
-    const row = icon.closest('tr');
-    const fields = row.querySelectorAll('.editable');
+    function renderPagination(meta) {
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
 
-    fields.forEach(cell => {
-      const field = cell.dataset.field;
-      const value = cell.textContent.trim();
-
-      let inputEl;
-
-      if (field === 'role') {
-        inputEl = document.createElement('select');
-        ['admin', 'agent', 'client'].forEach(role => {
-          const option = document.createElement('option');
-          option.value = role;
-          option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-          if (role === value.toLowerCase()) option.selected = true;
-          inputEl.appendChild(option);
-        });
+      if (meta.prev_page_url) {
+        pagination.appendChild(createPageItem('Previous', meta.prev_page_url));
       } else {
-        inputEl = document.createElement('input');
-        inputEl.type = 'text';
-        inputEl.value = value;
+        pagination.appendChild(createDisabledPageItem('Previous'));
       }
 
-      inputEl.classList.add('form-control', 'form-control-sm');
-      inputEl.setAttribute('name', field);
-      cell.innerHTML = '';
-      cell.appendChild(inputEl);
-    });
-
-    icon.classList.remove('fa-pen-to-square');
-    icon.classList.add('fa-floppy-disk');
-    icon.onclick = () => saveRow(row, userid);
-  }
-
-  window.saveRow = async function (row, userid) {
-    const inputs = row.querySelectorAll('input, select');
-    const updatedData = { userid };
-
-    inputs.forEach(input => {
-      updatedData[input.name] = input.value;
-    });
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/admin/profiles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify(updatedData)
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        document.getElementById('status').className = 'text-success';
-        document.getElementById('status').textContent = result.message || 'User updated.';
+      if (meta.next_page_url) {
+        pagination.appendChild(createPageItem('Next', meta.next_page_url));
       } else {
-        document.getElementById('status').className = 'text-danger';
-        document.getElementById('status').textContent = result.message || 'Failed to update user.';
+        pagination.appendChild(createDisabledPageItem('Next'));
       }
-    } catch (error) {
-      console.error(error);
-      document.getElementById('status').className = 'text-danger';
-      document.getElementById('status').textContent = 'Server error.';
     }
 
-    inputs.forEach(input => {
-      const span = document.createElement('span');
-      span.classList.add('editable');
-      span.setAttribute('data-field', input.name);
-      span.textContent = input.value;
-      input.parentNode.replaceWith(span);
-    });
-
-    const icon = row.querySelector('.fa-floppy-disk');
-    icon.classList.remove('fa-floppy-disk');
-    icon.classList.add('fa-pen-to-square');
-    icon.onclick = () => enableEditing(icon, userid);
-  }
-
-  window.deleteUser = async function (userid) {
-    if (!confirm("Are you sure you want to delete this user?")) return;
-
-    try {
-      const response = await fetch(`/api/admin/user/delete/${userid}`, {
-        method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': token
-        }
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        document.getElementById('status').className = 'text-success';
-        document.getElementById('status').textContent = 'User deleted successfully.';
-        fetchUsers();
-      } else {
-        document.getElementById('status').className = 'text-danger';
-        document.getElementById('status').textContent = result.message || 'Failed to delete user.';
-      }
-    } catch (error) {
-      console.error(error);
-      document.getElementById('status').className = 'text-danger';
-      document.getElementById('status').textContent = 'Server error.';
-    }
-  }
-  const renderPagination = (meta) => {
-    pagination.innerHTML = '';
-    if (meta.prev_page_url) {
-      pagination.appendChild(createPageItem('Previous', meta.prev_page_url));
-    } else {
-      pagination.appendChild(createDisabledPageItem('Previous'));
+    function createPageItem(text, url) {
+      const li = document.createElement('li');
+      li.classList.add('page-item');
+      const a = document.createElement('a');
+      a.classList.add('page-link');
+      a.href = '#';
+      a.textContent = text;
+      a.onclick = (e) => {
+        e.preventDefault();
+        fetchUsers(url);
+      };
+      li.appendChild(a);
+      return li;
     }
 
-    if (meta.next_page_url) {
-      pagination.appendChild(createPageItem('Next', meta.next_page_url));
-    } else {
-      pagination.appendChild(createDisabledPageItem('Next'));
+    function createDisabledPageItem(text) {
+      const li = document.createElement('li');
+      li.classList.add('page-item', 'disabled');
+      li.innerHTML = `<span class="page-link">${text}</span>`;
+      return li;
     }
-  };
-    const createPageItem = (text, url) => {
-        const li = document.createElement('li');
-        li.classList.add('page-item');
-        const a = document.createElement('a');
-        a.classList.add('page-link');
-        a.href = '#';
-        a.textContent = text;
-        a.onclick = (e) => {
-            e.preventDefault();
-            fetchTickets(url);
-        };
-        li.appendChild(a);
-        return li;
-    };
 
-    const createDisabledPageItem = (text) => {
-        const li = document.createElement('li');
-        li.classList.add('page-item', 'disabled');
-        li.innerHTML = `<span class="page-link">${text}</span>`;
-        return li;
-    };
-  fetchUsers();
-});
+    document.getElementById('searchInput').addEventListener('input', debounce(() => {
+      currentUserQuery = document.getElementById('searchInput').value;
+      fetchUsers(); // Triggers reload with query
+    }, 400));
+
+    fetchUsers(); // Initial load
+  });
 </script>
+
+
 
