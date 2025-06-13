@@ -5,9 +5,7 @@ use Illuminate\Support\Facades\Route;
 // clienthome,kb,auth(login register forgotpassword resetpassword ),tickets(index,create,show,edit),profile(show,edit),errorlogs(view)
 
 Route::view('/','clienthome')->name('home');
-Route::view('/admin','adminhome')->name('adminhome');
 Route::view('/knowledgebase','guest.knowledge')->name('kb');
-
 
 Route::view('/register','guest.register')->name('register');
 Route::view('/login','guest.login')->name('login');
@@ -36,4 +34,22 @@ Route::group(['prefix'=>'tickets'],function () {
 
 Route::get('/errortest',function(){
     throw new \Exception("Something went wrong!");
+});
+
+Route::group(['prefix'=>'admin'],function () {
+    Route::view('/','adminhome')->name('adminhome');
+    Route::group(['prefix'=>'tickets'],function () {
+        Route::view('/','admin.tickets')->name('atickets');
+        Route::view('/create','admin.newtickets')->name('aticket');
+        Route::get('/{id}',function($id){
+            return view('admin.ticketshow',compact('id'));
+        })->name('aticketshow');
+        Route::get('/{id}/edit',function($id){
+            return view('admin.ticketedit',compact('id'));
+        })->name('aticketedit');
+    });
+    Route::view('/profiles','admin.profiles')->name('profiles');
+    Route::view('/errorlogs','admin.errorlog')->name('errorlog');
+    Route::view('/mailconfig','admin.mailconfig')->name('mail');
+    //kb,ticketshowedit,profileshowedit/myProfile
 });

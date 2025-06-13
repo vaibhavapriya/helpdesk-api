@@ -64,7 +64,7 @@
   <div class="sidebar">
     <!-- Sidebar user panel (optional) -->
     <div class="user-panel nav-item  mt-3 pb-3 mb-3 d-flex">
-      <a href="adminhome" class="nav-link active">
+      <a href="{{ route('adminhome') }}" class="nav-link active">
         <i class="fas fa-house nav-icon"></i>
       </a>
     </div>
@@ -84,13 +84,13 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="adminTicket" class="nav-link">
+              <a href="{{ route('aticket') }}" class="nav-link">
                 <i class="far fa-newspaper nav-icon"></i>
                 <p>New Ticket</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="tickets" class="nav-link">
+              <a href="{{ route('atickets') }}" class="nav-link">
                 <!-- <i class="far fa-circle nav-icon"></i> -->
                 <i class="fas fa-database nav-icon"></i>
                 <p>View Tickets</p>
@@ -99,15 +99,15 @@
           </ul>
         </li>
         <li class="nav-item">
-          <a href="users" class="nav-link active">
+          <a href="{{ route('profiles') }}" class="nav-link active">
             <i class="fas fa-user nav-icon"></i>
             <p>
-              User
+              Users
             </p>
           </a>
         </li>
         <li class="nav-item">
-          <a href="home" class="nav-link active">
+          <a href="{{ route('home') }}" class="nav-link active">
           <i class="fas fa-display nav-icon"></i>
             <p>
               User Portal
@@ -132,7 +132,7 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="#" class="nav-link">
+              <a href="{{ route('kb') }}" class="nav-link">
                 <i class="fas fa-lightbulb nav-icon"></i>
                 <p>FAQ,Support</p>
               </a>
@@ -146,7 +146,7 @@
           </ul>
         </li>
         <li class="nav-item">
-          <a href="errorlog" class="nav-link">
+          <a href="{{ route('errorlog') }}" class="nav-link">
             <!-- <i class="nav-icon fas fa-th"></i> -->
             <i class="fas fa-bug nav-icon"></i>
             <p>
@@ -163,7 +163,13 @@
 </aside>
 
 <main>
-    @yield('content')
+  <div class="content-wrapper">
+    <section class="content pt-3">
+      <div class="container-fluid">
+        @yield('content')
+      </div>
+    </section>
+  </div>
 </main>
 
 <footer >

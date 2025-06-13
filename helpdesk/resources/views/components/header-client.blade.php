@@ -39,7 +39,7 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
             <li id="admin-portal" style="display:none;">
-              <a class="dropdown-item" href="{{ route('kb') }}">
+              <a class="dropdown-item" href="{{ route('adminhome') }}">
                 <i class="fas fa-user-shield me-2"></i> Admin Portal
               </a>
             </li>
