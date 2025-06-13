@@ -53,9 +53,13 @@
             <i class="fas fa-envelope mr-2"></i> Password
           </a>
           <div class="dropdown-divider"></div>
-          <a href="logout" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> Logout
-          </a>
+
+          <form id="logout-form" method="POST" class="d-block m-0 p-0">
+            @csrf
+            <button type="submit" class="dropdown-item text-left w-100">
+              <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
+          </form>
       </li>
     </ul>
 </nav>
@@ -194,8 +198,41 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
-    function showLoadingAndRedirect(url) {
+  const token = localStorage.getItem('auth_token');
+  const logoutForm = document.getElementById('logout-form');
+    logoutForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Clear localStorage and redirect to login
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_role');
+        window.location.href = '/login';
+      } else {
+        alert('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Logout error, see console');
+    }
+  });
+function showLoadingAndRedirect(url) {
   const overlay = document.getElementById('loadingOverlay');
   if (overlay) overlay.style.display = 'flex';
   window.location.href = url;
