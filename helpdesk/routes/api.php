@@ -21,7 +21,7 @@ Route::post('/reset-password/{token}', [AuthController::class,'resetP']) ;
 Route::group(['middleware'=>'auth:sanctum'],function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile/{id}',[ProfileController::class,'show'])->name('profile');//done
-    Route::put('/profile/{id}',[ProfileController::class,'update'])->name('profile-p');//d without image
+    Route::put('/profile/{id}/update',[ProfileController::class,'update'])->name('profile-p');//d without image
     Route::put('/profile/{id}/updatePassword',[AuthController::class,'upadetePassword'])->name('profile-p');
     Route::get('/mytickets',[TicketController::class,'index']);//done
     Route::post('/mytickets',[TicketController::class,'store']);//done

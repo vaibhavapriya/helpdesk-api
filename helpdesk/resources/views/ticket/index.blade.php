@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const renderTickets = (tickets) => {
         tableBody.innerHTML = tickets.length
             ? tickets.map(ticket => `
-                <tr data-id="${ticket.id}">
+                <tr class="ticket-row" data-id="${ticket.id}">
                     <td>${ticket.id}</td>
                     <td>${ticket.title}</td>
                     <td>${capitalize(ticket.priority)}</td>
@@ -119,7 +119,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 </tr>
             `).join('')
             : '<tr><td colspan="6" class="text-center">No tickets found.</td></tr>';
-
+        tableBody.querySelectorAll('.ticket-row').forEach(row => {
+            row.addEventListener('click', function () {
+                const id = this.dataset.id;
+                window.location.href = `/tickets/${id}`;
+            });
+        });
         // Add event listeners to delete buttons
         tableBody.querySelectorAll('.btn-delete').forEach(button => {
             button.addEventListener('click', async (event) => {

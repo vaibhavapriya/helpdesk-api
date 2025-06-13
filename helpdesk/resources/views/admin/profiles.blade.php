@@ -1,6 +1,12 @@
 @extends('components.layouts.app.admin')
 
 @section('content')
+    <div class="row justify-content-center row mb-3">
+      <div class="col-md-6">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search Users...">
+      </div>
+    </div>
+
 <h2 class="mb-4">Users</h2>
 
 <div id="status" class="mb-3 text-muted"></div>

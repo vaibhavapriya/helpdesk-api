@@ -17,15 +17,15 @@
             {{-- First Name --}}
             <div class="col-md-6">
                 <label class="form-label">First Name</label>
-                <div class="form-control-plaintext d-none" id="first_name_display"></div>
-                <input type="text" name="first_name" id="first_name" class="form-control d-none" value="">
+                <div class="form-control-plaintext d-none" id="firstname_display"></div>
+                <input type="text" name="firstname" id="firstname" class="form-control d-none" value="">
             </div>
 
             {{-- Last Name --}}
             <div class="col-md-6">
                 <label class="form-label">Last Name</label>
-                <div class="form-control-plaintext d-none" id="last_name_display"></div>
-                <input type="text" name="last_name" id="last_name" class="form-control d-none" value="">
+                <div class="form-control-plaintext d-none" id="lastname_display"></div>
+                <input type="text" name="lastname" id="lastname" class="form-control d-none" value="">
             </div>
 
             {{-- Phone --}}
@@ -74,7 +74,7 @@
         const form = document.getElementById('profileForm');
         const avatarDisplay = document.getElementById('avatar_display');
 
-        const fields = ['first_name', 'last_name', 'phone', 'email', 'avatar'];
+        const fields = ['firstname', 'lastname', 'phone', 'email', 'avatar'];
         const originalValues = {};
 
         function toggleEditMode(editMode) {
@@ -105,14 +105,14 @@
                 if (!response.ok) throw new Error('Failed to load profile');
                 const json = await response.json();
 
-                if (!json.success) throw new Error('Profile load failed');
 
                 const data = json.data;
+                console.log(json);
 
                 // Map API keys to form fields
                 const fieldMap = {
-                    first_name: data.firstname || '',
-                    last_name: data.lastname || '',
+                    firstname: data.firstname || '',
+                    lastname: data.lastname || '',
                     phone: data.phone || '',
                     email: data.email || '',
                 };
@@ -146,7 +146,7 @@
 
         cancelBtn.addEventListener('click', () => {
             // Reset inputs to original values
-            ['first_name', 'last_name', 'phone', 'email'].forEach(field => {
+            ['firstname', 'lastname', 'phone', 'email'].forEach(field => {
                 const input = document.getElementById(field);
                 const display = document.getElementById(field + '_display');
                 input.value = originalValues[field];
@@ -180,7 +180,7 @@
                 const updatedData = await response.json();
 
                 // Update UI with new values
-                ['first_name', 'last_name', 'phone', 'email'].forEach(field => {
+                ['firstname', 'lastname', 'phone', 'email'].forEach(field => {
                     const input = document.getElementById(field);
                     const display = document.getElementById(field + '_display');
                     display.textContent = input.value;
