@@ -30,6 +30,11 @@
     </tbody>
   </table>
 </div>
+    <nav>
+        <ul class="pagination" id="pagination">
+            <!-- JS inserts pagination here -->
+        </ul>
+    </nav>
 @endsection
 
 
@@ -78,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
           tableBody.appendChild(row);
         });
+        renderPagination(result.meta);
       } else {
         statusDiv.className = 'text-danger';
         statusDiv.textContent = result.message || 'Something went wrong.';
@@ -201,7 +207,41 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('status').textContent = 'Server error.';
     }
   }
+  const renderPagination = (meta) => {
+    pagination.innerHTML = '';
+    if (meta.prev_page_url) {
+      pagination.appendChild(createPageItem('Previous', meta.prev_page_url));
+    } else {
+      pagination.appendChild(createDisabledPageItem('Previous'));
+    }
 
+    if (meta.next_page_url) {
+      pagination.appendChild(createPageItem('Next', meta.next_page_url));
+    } else {
+      pagination.appendChild(createDisabledPageItem('Next'));
+    }
+  };
+    const createPageItem = (text, url) => {
+        const li = document.createElement('li');
+        li.classList.add('page-item');
+        const a = document.createElement('a');
+        a.classList.add('page-link');
+        a.href = '#';
+        a.textContent = text;
+        a.onclick = (e) => {
+            e.preventDefault();
+            fetchTickets(url);
+        };
+        li.appendChild(a);
+        return li;
+    };
+
+    const createDisabledPageItem = (text) => {
+        const li = document.createElement('li');
+        li.classList.add('page-item', 'disabled');
+        li.innerHTML = `<span class="page-link">${text}</span>`;
+        return li;
+    };
   fetchUsers();
 });
 </script>

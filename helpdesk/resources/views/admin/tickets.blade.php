@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     };
 
-       const renderPagination = (meta) => {
+    const renderPagination = (meta) => {
         pagination.innerHTML = '';
 
         if (meta.prev_page_url) {

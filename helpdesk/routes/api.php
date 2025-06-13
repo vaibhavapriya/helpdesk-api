@@ -29,7 +29,6 @@ Route::group(['middleware'=>'auth:sanctum'],function () {
     Route::put('/tickets/{id}/update',[TicketController::class,'update']);//done
     Route::delete('/tickets/{id}/delete',[TicketController::class,'destroy']);//done
     Route::post('/tickets/{ticket}/comment',[ReplyController::class,'store'])->name('comment');//done
-    Route::get('/errorlogs',[ErrorlogsController::class,'index']);//done
 });
 
 Route::group(['prefix'=>'admin','middleware'=>['auth:sanctum','role:admin']],function () {//role middleware
@@ -39,5 +38,6 @@ Route::group(['prefix'=>'admin','middleware'=>['auth:sanctum','role:admin']],fun
     Route::get('/profiles',[ProfileController::class,'index']);//done
     Route::get('/mails',[MailconfigController::class,'index']);//done
     Route::patch('/mails/{id}',[MailconfigController::class,'update']);//done
+    Route::get('/errorlogs',[ErrorlogsController::class,'index']);//done
 });
 //view errorlogs, profile change password, mails index,store,upadate
