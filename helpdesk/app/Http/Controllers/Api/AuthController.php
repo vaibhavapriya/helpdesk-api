@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Mail\ForgotPasswordMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\MailConfig;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {

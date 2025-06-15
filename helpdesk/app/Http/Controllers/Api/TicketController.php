@@ -240,6 +240,7 @@ class TicketController extends Controller
             'description' => 'required|string',
             'priority' => 'required|string',
             'department' => 'required|string',
+            'status' => 'required|in:open,closed',  // <-- Added validation for status
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx',
         ]);
 
@@ -248,6 +249,7 @@ class TicketController extends Controller
             'description' => $validated['description'],
             'priority' => $validated['priority'],
             'department' => $validated['department'],
+            'status' => $validated['status'],  // <-- Save status here
         ]);
 
         if ($request->hasFile('attachment')) {
@@ -277,9 +279,10 @@ class TicketController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Ticket updated successfully',
-            //'data' => $ticket->load('image'), // or 'images' depending on your relationship
+            //'data' => $ticket->load('image'), // uncomment if you want to return updated ticket with image relation
         ]);
     }
+
     /**
      * Remove the specified resource from storage.
      */

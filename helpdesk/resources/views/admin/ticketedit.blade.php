@@ -36,6 +36,16 @@
             <div class="invalid-feedback" id="department_error"></div>
         </div>
 
+        <!-- New Status Field -->
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status" required>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+            </select>
+            <div class="invalid-feedback" id="status_error"></div>
+        </div>
+
         <div class="mb-3">
             <label>Current Attachment</label><br>
             <img id="current-attachment" src="" alt="Ticket Attachment" style="max-width: 300px;">
@@ -58,12 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorList = document.getElementById('error-list');
     const currentAttachment = document.getElementById('current-attachment');
 
-    // Get token from localStorage
     const token = 'Bearer ' + localStorage.getItem('auth_token');
     const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
     const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
 
-    // Fetch ticket data from API to pre-fill form
     async function fetchTicket() {
         try {
             const response = await fetch(apiBase, {
@@ -75,14 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to fetch ticket');
             const data = await response.json();
 
-            // Populate form fields
             document.getElementById('title').value = data.data.title;
             document.getElementById('description').value = data.data.description;
             document.getElementById('priority').value = data.data.priority;
             document.getElementById('department').value = data.data.department;
 
+            // Set status value if exists (default to open)
+            document.getElementById('status').value = data.data.status || 'open';
+
             if (data.filelink) {
                 currentAttachment.src = data.filelink.startsWith('http') ? data.filelink : `{{ Storage::url('') }}${data.filelink}`;
+                currentAttachment.style.display = 'block';
             } else {
                 currentAttachment.style.display = 'none';
             }
@@ -92,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Call fetchTicket on page load
     fetchTicket();
 
     form.addEventListener('submit', async (e) => {
@@ -101,30 +111,38 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessages.classList.add('d-none');
         errorList.innerHTML = '';
 
-        // Prepare form data
+        // Clear previous inline errors including status
+        ['title', 'description', 'priority', 'department', 'status', 'attachment'].forEach(field => {
+            const errField = document.getElementById(field + '_error');
+            if (errField) {
+                errField.textContent = '';
+                errField.style.display = 'none';
+            }
+        });
+
         const formData = new FormData(form);
         formData.append('_method', 'PUT');
+
         try {
-            const response = await fetch(`/api/tickets/${ticketId}/update`, {
-                method: 'POST', // or 'PUT'if file not uploaded
+            const response = await fetch(apiBase + '/update', {
+                method: 'POST', // Laravel expects POST with _method=PUT for file uploads
                 headers: {
                     'Authorization': token,
-                    // **DO NOT** set 'Content-Type' when sending FormData — browser sets it automatically
+                    "Accept": "application/json",
                 },
                 body: formData
             });
 
             if (response.status === 422) {
-                // Validation errors
                 const data = await response.json();
                 errorMessages.classList.remove('d-none');
+
                 Object.entries(data.errors).forEach(([field, messages]) => {
-                    const errorField = document.getElementById(field + '_error');
-                    if (errorField) {
-                        errorField.textContent = messages.join(', ');
-                        errorField.style.display = 'block';
+                    const errField = document.getElementById(field + '_error');
+                    if (errField) {
+                        errField.textContent = messages.join(', ');
+                        errField.style.display = 'block';
                     }
-                    // Also add to alert box
                     messages.forEach(msg => {
                         const li = document.createElement('li');
                         li.textContent = msg;
@@ -139,8 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             alert('Ticket updated successfully!');
-            // Optionally redirect or refresh page
-            // window.location.href = '/tickets/' + ticketId;
+            // Optionally redirect or reload page here
         } catch (error) {
             alert('Unexpected error occurred.');
             console.error(error);
