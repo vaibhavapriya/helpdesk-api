@@ -20,7 +20,7 @@ class ProfileController extends Controller
     {
         $queryParam = $request->query('query');
 
-        $profilesQuery = Profile::with('image')->latest();
+        $profilesQuery = Profile::with('user')->latest();
 
         if ($queryParam) {
             $profilesQuery->where(function ($q) use ($queryParam) {
@@ -32,7 +32,7 @@ class ProfileController extends Controller
             });
         }
 
-        $profiles = $profilesQuery->simplePaginate(15);
+        $profiles = $profilesQuery->paginate(15);
 
         return response()->json([
             'success' => true,
@@ -40,8 +40,10 @@ class ProfileController extends Controller
             'meta' => [
                 'current_page' => $profiles->currentPage(),
                 'next_page_url' => $profiles->nextPageUrl(),
-                'per_page' => $profiles->perPage(),
+                //'per_page' => $profiles->perPage(),
                 'prev_page_url' => $profiles->previousPageUrl(),
+                //'last_page' => $profiles->lastPage(),
+                //'total' => $profiles->total(),
             ]
         ]);
     }

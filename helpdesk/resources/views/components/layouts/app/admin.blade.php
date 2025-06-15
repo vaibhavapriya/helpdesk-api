@@ -45,11 +45,11 @@
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
           <div class="dropdown-divider"></div>
-          <a href="adminProfile" class="dropdown-item">
+          <a href="{{ route('profile') }}" class="dropdown-item">
             <i class="fas fa-envelope mr-2"></i> Profile
           </a>
           <div class="dropdown-divider"></div>
-          <a href="adminProfile" class="dropdown-item">
+          <a href="{{ route('profile') }}" class="dropdown-item">
             <i class="fas fa-envelope mr-2"></i> Password
           </a>
           <div class="dropdown-divider"></div>

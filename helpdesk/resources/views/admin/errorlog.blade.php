@@ -11,7 +11,7 @@
           <tr>
             <th>ID</th>
             <th>Error Message</th>
-            <th>Tech Stack</th>
+            <th>Method</th>
             <th>Route</th>
             <th>Created At</th>
           </tr>
@@ -57,7 +57,7 @@
             row.innerHTML = `
               <td>#${error.id}</td>
               <td>${error.error_message}</td>
-              <td>${error.tech_stack}</td>
+              <td>${error.method}</td>
               <td>${error.route}</td>
               <td>${error.created_at}</td>
             `;

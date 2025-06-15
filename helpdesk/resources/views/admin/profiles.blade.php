@@ -94,11 +94,11 @@
               <td>${user.user_id}</td>
               <td><span class="editable" data-field="firstname">${user.firstname}</span></td>
               <td><span class="editable" data-field="lastname">${user.lastname}</span></td>
-              <td><span class="editable" data-field="role">${user.role}</span></td>
+              <td><span class="editable" data-field="role">${user.user.role}</span></td>
               <td><span class="editable" data-field="email">${user.email}</span></td>
               <td><span class="editable" data-field="phone">${user.phone}</span></td>
-              <td><i class="fa-solid fa-pen-to-square edit-icon" onclick="enableEditing(this, ${user.userid})"></i></td>
-              <td><i class="fa-solid fa-trash text-danger" onclick="deleteUser(${user.userid})"></i></td>
+              <td><i class="fa-solid fa-pen-to-square edit-icon" onclick="enableEditing(this, ${user.user_id})"></i></td>
+              <td><i class="fa-solid fa-trash text-danger" onclick="deleteUser(${user.user_id})"></i></td>
             `;
             tableBody.appendChild(row);
           });
@@ -162,6 +162,80 @@
 
     fetchUsers(); // Initial load
   });
+
+  // Enable inline editing
+  function enableEditing(iconElement, userId) {
+    const row = iconElement.closest('tr');
+    const editableCells = row.querySelectorAll('.editable');
+
+    editableCells.forEach(cell => {
+      const field = cell.dataset.field;
+      const value = cell.textContent.trim();
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control';
+      input.name = field;
+      input.value = value;
+      input.setAttribute('data-original-value', value);
+
+      const td = cell.parentNode;
+      td.replaceChild(input, cell);
+    });
+
+    iconElement.classList.remove('fa-pen-to-square');
+    iconElement.classList.add('fa-save');
+    iconElement.onclick = () => saveUserChanges(iconElement, userId);
+  }
+
+  // Save inline edits
+  function saveUserChanges(iconElement, userId) {
+    const row = iconElement.closest('tr');
+    const inputs = row.querySelectorAll('input');
+
+    const updatedData = {
+      _method: 'PUT'  // Laravel-style method spoofing
+    };
+
+    inputs.forEach(input => {
+      updatedData[input.name] = input.value;
+    });
+
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
+
+    fetch(`http://127.0.0.1:8000/api/profile/${userId}/update`, {
+      method: 'POST', // Use POST and spoof PUT
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(updatedData)
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        inputs.forEach(input => {
+          const span = document.createElement('span');
+          span.className = 'editable';
+          span.dataset.field = input.name;
+          span.textContent = input.value;
+          input.parentNode.replaceChild(span, input);
+        });
+
+        iconElement.classList.remove('fa-save');
+        iconElement.classList.add('fa-pen-to-square');
+        iconElement.onclick = () => enableEditing(iconElement, userId);
+      } else {
+        alert('Update failed: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      alert('Server error while saving changes.');
+    });
+  }
+
 </script>
 
 
