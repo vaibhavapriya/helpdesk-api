@@ -52,5 +52,11 @@ Route::group(['prefix'=>'admin'],function () {
     Route::view('/profile','admin.profile')->name('profile');
     Route::view('/errorlogs','admin.errorlog')->name('errorlog');
     Route::view('/mailconfig','admin.mailconfig')->name('mail');
+    Route::get('/profile/{id}', function ($id) {
+        return view('admin.usershow', compact('id'));
+    })->name('profile.show');
     //kb,ticketshowedit,profileshowedit/myProfile
 });
+    Route::get('/profile/{id}', function ($id) {
+        return view('admin.usershow', compact('id'));
+    })->name('profile.show');

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('priority', ['low', 'medium', 'high']);
             //$table->foreignId('image_id')->constrained('image')->nullable();
             $table->string('attachment')->nullable();
-            $table->enum('status', ['open', 'closed'])->default('open');
+            $table->enum('status', ['open', 'closed'])->default('open')->index(); 
             $table->string('department');
             $table->timestamp('last_reply')->nullable();
             $table->timestamps();

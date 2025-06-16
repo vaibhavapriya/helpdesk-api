@@ -71,7 +71,7 @@ class ProfileController extends Controller
      */
     public function show(String $id)
     {
-        $profile = Profile::with('image')->where('user_id', $id)->firstOrFail();$profile = Profile::with(['image'])->findOrFail($id);//user_id
+        $profile = Profile::with('image')->where('user_id', $id)->firstOrFail();//user_id
         $this->authorize('view', $profile);
         return response()->json([
         'success' => true,
