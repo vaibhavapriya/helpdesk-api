@@ -9,9 +9,18 @@
                 <h4 class="title mb-3">New Ticket</h4>
                 <p class="information text-muted">Please provide the following information about your query.</p>
 
-                <!-- Requester (searchable dropdown) -->
+                <!-- User Selection Toggle -->
                 <div class="form-group mt-3">
-                    <label for="requester_id" class="form-label">Requester</label>
+                    <label for="user-toggle" class="form-label">Create ticket for:</label>
+                    <select class="form-select" id="user-toggle">
+                        <option value="self">Myself</option>
+                        <option value="other">Another User</option>
+                    </select>
+                </div>
+
+                <!-- Requester (Searchable Dropdown) -->
+                <div class="form-group mt-3" id="requester-container" style="display: none;">
+                    <label for="requester_search" class="form-label">Requester</label>
                     <input type="text" class="form-control" id="requester_search" placeholder="Search user by email">
                     <select class="form-select d-none" id="requester_id" name="requester_id" size="5" style="height: auto;"></select>
                     <div class="invalid-feedback" id="requester_id_error"></div>
@@ -69,8 +78,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('ticket-form');
-    const userId = localStorage.getItem('user_id');
     const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const userId = localStorage.getItem('user_id');
+    const userToggle = document.getElementById('user-toggle');
+    const requesterContainer = document.getElementById('requester-container');
     const requesterSearch = document.getElementById('requester_search');
     const requesterSelect = document.getElementById('requester_id');
     let users = [];
@@ -85,8 +96,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
             if (!response.ok) throw new Error('Failed to load users');
-            data = await response.json(); // expected [{id: 1, email: 'x@y.com'}, ...]
-            users=data.data;
+            const data = await response.json();
+            users = data.data;
             // Populate select initially with all users
             populateRequesterOptions(users);
         } catch (error) {
@@ -125,11 +136,24 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Set default requester_id to logged-in user
+    document.getElementById('requester_id').value = userId;
+
+    // Toggle visibility of requester selection
+    userToggle.addEventListener('change', () => {
+        if (userToggle.value === 'self') {
+            requesterContainer.style.display = 'none';
+            document.getElementById('requester_id').value = userId;
+        } else {
+            requesterContainer.style.display = 'block';
+            document.getElementById('requester_id').value = '';
+        }
+    });
+
+    // Initial fetch of users
     fetchUsers();
 
     // Form submit handler
-
-
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -137,18 +161,18 @@ document.addEventListener('DOMContentLoaded', function () {
         ['requester_id', 'title', 'priority', 'department', 'description'].forEach(field => {
             document.getElementById(`${field}_error`).textContent = '';
             const el = document.getElementById(field);
-            if(el) el.classList.remove('is-invalid');
+            if (el) el.classList.remove('is-invalid');
         });
 
         // Validate requester_id manually (make sure requester_id has a value)
-        if(!requesterSelect.value) {
+        if (!requesterSelect.value && userToggle.value === 'other') {
             document.getElementById('requester_id_error').textContent = 'Please select a requester.';
             requesterSearch.classList.add('is-invalid');
             return;
         }
 
         const formData = new FormData(form);
-        formData.set('requester_id', requesterSelect.value); // explicitly set requester_id in formData
+        formData.set('requester_id', userToggle.value === 'self' ? userId : requesterSelect.value);
 
         try {
             const response = await fetch('http://127.0.0.1:8000/api/admin/tickets', {
@@ -185,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function () {
             form.reset();
             requesterSelect.classList.add('d-none');
             requesterSearch.value = '';
-
         } catch (error) {
             console.error('Unexpected error:', error);
             alert('Something went wrong.');
@@ -193,4 +216,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
 @endsection
