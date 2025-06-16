@@ -78,12 +78,12 @@
             `;
             
             const attachmentContainer = document.getElementById('attachmentContainer');
-            if (!ticket.attachment_type) {
+            if (!ticket.image) {
             attachmentContainer.textContent = "No attachment available.";
             }
             else {
-            attachmentContainer.innerHTML = `<img src="/project/image.php?id=${ticketId}" 
-                alt="Ticket Attachment" style="max-width: 400px; height: auto;">`;
+            attachmentContainer.innerHTML = `<img src="http://127.0.0.1:8000/storage/${ticket.image.link}" 
+                alt="Ticket Attachment" style="max-width: 600px; height: auto;">`;
             }
         }
 

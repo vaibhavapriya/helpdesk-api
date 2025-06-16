@@ -154,9 +154,6 @@ class AuthController extends Controller
         // Step 1: Find user by ID
         $user = User::findOrFail($id);
 
-        // Step 2: Authorization
-        $this->authorize('view', $user); // or use 'update' if appropriate
-
         // Step 3: Validate input
         $request->validate([
             'old_password' => 'required|string',
