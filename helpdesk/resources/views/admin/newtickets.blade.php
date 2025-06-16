@@ -8,7 +8,15 @@
             <div class="card-body">
                 <h4 class="title mb-3">New Ticket</h4>
                 <p class="information text-muted">Please provide the following information about your query.</p>
-                
+
+                <!-- Requester (searchable dropdown) -->
+                <div class="form-group mt-3">
+                    <label for="requester_id" class="form-label">Requester</label>
+                    <input type="text" class="form-control" id="requester_search" placeholder="Search user by email">
+                    <select class="form-select d-none" id="requester_id" name="requester_id" size="5" style="height: auto;"></select>
+                    <div class="invalid-feedback" id="requester_id_error"></div>
+                </div>
+
                 <!-- Title -->
                 <div class="form-group mt-3">
                     <label for="title" class="form-label">Title</label>
@@ -61,18 +69,86 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('ticket-form');
+    const userId = localStorage.getItem('user_id');
     const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const requesterSearch = document.getElementById('requester_search');
+    const requesterSelect = document.getElementById('requester_id');
+    let users = [];
+
+    // Fetch all users on load
+    async function fetchUsers() {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/admin/useridemail', {
+                headers: {
+                    'Authorization': token,
+                    'Accept': 'application/json',
+                }
+            });
+            if (!response.ok) throw new Error('Failed to load users');
+            data = await response.json(); // expected [{id: 1, email: 'x@y.com'}, ...]
+            users=data.data;
+            // Populate select initially with all users
+            populateRequesterOptions(users);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    }
+
+    function populateRequesterOptions(filteredUsers) {
+        requesterSelect.innerHTML = '';
+        if (filteredUsers.length === 0) {
+            requesterSelect.classList.add('d-none');
+            return;
+        }
+        filteredUsers.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.id;
+            option.textContent = user.email;
+            requesterSelect.appendChild(option);
+        });
+        requesterSelect.classList.remove('d-none');
+    }
+
+    // Filter dropdown as user types
+    requesterSearch.addEventListener('input', () => {
+        const searchTerm = requesterSearch.value.toLowerCase();
+        const filtered = users.filter(user => user.email.toLowerCase().includes(searchTerm));
+        populateRequesterOptions(filtered);
+    });
+
+    // When user selects from dropdown, update input and hide dropdown
+    requesterSelect.addEventListener('change', () => {
+        const selectedOption = requesterSelect.options[requesterSelect.selectedIndex];
+        if (selectedOption) {
+            requesterSearch.value = selectedOption.textContent;
+            requesterSelect.classList.add('d-none');
+        }
+    });
+
+    fetchUsers();
+
+    // Form submit handler
+
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const formData = new FormData(form);
-
         // Clear previous error messages
-        ['title', 'priority', 'department', 'description'].forEach(field => {
+        ['requester_id', 'title', 'priority', 'department', 'description'].forEach(field => {
             document.getElementById(`${field}_error`).textContent = '';
-            document.getElementById(field).classList.remove('is-invalid');
+            const el = document.getElementById(field);
+            if(el) el.classList.remove('is-invalid');
         });
+
+        // Validate requester_id manually (make sure requester_id has a value)
+        if(!requesterSelect.value) {
+            document.getElementById('requester_id_error').textContent = 'Please select a requester.';
+            requesterSearch.classList.add('is-invalid');
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.set('requester_id', requesterSelect.value); // explicitly set requester_id in formData
 
         try {
             const response = await fetch('http://127.0.0.1:8000/api/admin/tickets', {
@@ -107,6 +183,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             alert('Ticket created successfully!');
             form.reset();
+            requesterSelect.classList.add('d-none');
+            requesterSearch.value = '';
 
         } catch (error) {
             console.error('Unexpected error:', error);

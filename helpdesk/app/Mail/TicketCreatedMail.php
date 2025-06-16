@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\MailConfig;
-use App\Models\Ticket; 
+use App\Models\Ticket;
 
 class TicketCreatedMail extends Mailable
 {
