@@ -33,7 +33,7 @@ class AuthController extends Controller
         $user = Auth::user();
 
         // Create token (with optional ability scopes)
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->accessToken;
 
         // Return user resource + token
         return (new UserResource($user))->additional([

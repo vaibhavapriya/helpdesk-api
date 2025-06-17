@@ -10,6 +10,7 @@ use App\Models\Profile;
 use App\Policies\ProfilePolicy;
 use App\Models\User;
 use App\Policies\UserPolicy;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        
+        //Passport::routes(); 
         Gate::policy(Ticket::class,TicketPolicy::class);
         Gate::policy(Profile::class,ProfilePolicy::class);
         Gate::policy(User::class,UserPolicy::class);

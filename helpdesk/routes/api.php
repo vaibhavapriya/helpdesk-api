@@ -9,16 +9,23 @@ use App\Http\Controllers\Api\ReplyController;
 use App\Http\Controllers\Api\MailconfigController;
 use App\Http\Controllers\Api\ErrorlogsController;
 
+use Laravel\Passport\Http\Controllers\AccessTokenController;
+use Psr\Http\Message\ServerRequestInterface;
+
+Route::post('/oauth/token', function (ServerRequestInterface $request) {
+    return app(AccessTokenController::class)->issueToken($request);
+});
+
 Route::get('/user', function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware('auth:api');
 
 Route::post('/login',[AuthController::class,'login'])->name('login-p');//done
 Route::post('/register',[AuthController::class,'register'])->name('register-p');//done
 Route::post('/forgot-password', [AuthController::class,'forgotP']);
 Route::post('/reset-password/{token}', [AuthController::class,'resetP']) ;
-
-Route::group(['middleware'=>'auth:sanctum'],function () {
+//accessToken
+Route::group(['middleware'=>'auth:api'],function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile/{id}',[ProfileController::class,'show'])->name('profile');//done
     Route::put('/profile/{id}/update',[ProfileController::class,'update'])->name('profile-p');//d without image
@@ -31,7 +38,7 @@ Route::group(['middleware'=>'auth:sanctum'],function () {
     Route::post('/tickets/{ticket}/comment',[ReplyController::class,'store'])->name('comment');//done
 });
 
-Route::group(['prefix'=>'admin','middleware'=>['auth:sanctum','role:admin']],function () {//role middleware
+Route::group(['prefix'=>'admin','middleware'=>['auth:api','role:admin']],function () {//role middleware
     Route::post('/tickets',[TicketController::class,'storeAdmin']);//done
     Route::get('/tickets',[TicketController::class,'indexAdmin']);//done add querytring
     Route::get('/useridemail',[ProfileController::class,'getUsersIdAndEmail']);//done
