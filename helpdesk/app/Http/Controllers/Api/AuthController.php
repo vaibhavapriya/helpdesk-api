@@ -73,7 +73,7 @@ class AuthController extends Controller
         
     }
 
-    public function resetP(Request $request)
+    public function resetPassword(Request $request)
     {
         // Step 1: Validate input
         $request->validate([
@@ -135,6 +135,31 @@ class AuthController extends Controller
             return response()->json(['error' => 'Failed to send reset email.'], 500);
         }
     }
+    public function resetP(Request $request)
+    {
+        // Validate incoming request
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'token' => 'required|string',
+            'password' => 'required|string|confirmed|min:8', // password_confirmation must match
+        ]);
+
+        // Attempt to reset the password
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                // Update the user's password
+                $user->password = Hash::make($password);
+                $user->save();
+            }
+        );
+
+        if ($status == Password::PASSWORD_RESET) {
+            return response()->json(['message' => 'Password reset successful.'], 200);
+        } else {
+            return response()->json(['error' => 'Invalid token or email.'], 400);
+        }
+    }
 
     // public function destroy()
     // {
@@ -144,8 +169,9 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-
+        //$request->user()->currentAccessToken()->delete();
+        $accessToken = $request->user()->token();
+        $accessToken->delete();
         return response()->json(['message' => 'Logged out']);
     }
 

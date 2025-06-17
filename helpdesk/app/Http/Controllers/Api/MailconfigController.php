@@ -14,8 +14,26 @@ class MailconfigController extends Controller
         $mails=MailConfig::all();
         return response()->json(['success' => true,'data' =>$mails ]);
     }
-    public function store(MailRequest $request){
-        
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'name' => 'required|string',
+            'passcode' => 'required|string',
+        ]);
+
+        $mail = MailConfig::create([
+            'mail_from_name'    => $validated['name'],
+            'mail_from_address' => $validated['email'],
+            'host'              => 'smtp.gmail.com',
+            'port'              => '587',
+            'encryption'        => 'tls',
+            'username'          => $validated['email'],
+            'password'          => $validated['passcode'],
+            'active'            => false,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Mail configuration added.']);
     }
     public function update(String $id){
         MailConfig::query()->update(['active' => 0]);
@@ -25,5 +43,18 @@ class MailconfigController extends Controller
         $mail->update(['active' => 1]);
 
         return response()->json(['success' => true, 'message' => 'Mail configuration updated.']);
+    }
+    public function destroy(String $id)
+    {
+        //$id = $request->query('id');
+        $config = MailConfig::find($id);
+
+        if (!$config) {
+            return response()->json(['status' => 'error'], 404);
+        }
+
+        $config->delete();
+
+        return response()->json(['status' => 'success']);
     }
 }

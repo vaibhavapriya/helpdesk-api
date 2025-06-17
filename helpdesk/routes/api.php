@@ -23,7 +23,7 @@ Route::get('/user', function (Request $request) {
 Route::post('/login',[AuthController::class,'login'])->name('login-p');//done
 Route::post('/register',[AuthController::class,'register'])->name('register-p');//done
 Route::post('/forgot-password', [AuthController::class,'forgotP']);
-Route::post('/reset-password/{token}', [AuthController::class,'resetP']) ;
+Route::post('/reset-password', [AuthController::class,'resetP']) ;
 //accessToken
 Route::group(['middleware'=>'auth:api'],function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -43,8 +43,12 @@ Route::group(['prefix'=>'admin','middleware'=>['auth:api','role:admin']],functio
     Route::get('/tickets',[TicketController::class,'indexAdmin']);//done add querytring
     Route::get('/useridemail',[ProfileController::class,'getUsersIdAndEmail']);//done
     Route::get('/profiles',[ProfileController::class,'index']);//done
-    Route::get('/mails',[MailconfigController::class,'index']);//done
-    Route::patch('/mails/{id}',[MailconfigController::class,'update']);//done
+    Route::prefix('mails')->group(function () {
+        Route::get('/', [MailconfigController::class, 'index']);
+        Route::post('/post', [MailconfigController::class, 'store']);
+        Route::delete('/delete/{id}', [MailconfigController::class, 'destroy']);
+        Route::patch('/{id}', [MailconfigController::class, 'update']);
+    });
     Route::get('/errorlogs',[ErrorlogsController::class,'index']);//done
 });
 //view errorlogs, profile change password, mails index,store,upadate

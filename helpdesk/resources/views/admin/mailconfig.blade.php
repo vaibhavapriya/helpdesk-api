@@ -37,6 +37,7 @@
   async function fetchEmails() {
     try {
       const response = await fetch('http://127.0.0.1:8000/api/admin/mails', {
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
             'Authorization': token
@@ -102,9 +103,11 @@
             row.querySelector('.delete-email').addEventListener('click', async (e) => {
             const emailId = e.target.closest('button').getAttribute('data-id');
             try {
-              const deleteResponse = await fetch(`mc/delete?id=${emailId}`, {
-                method: 'GET',
+              const deleteResponse = await fetch(`http://127.0.0.1:8000/api/admin/mails/delete/${emailId}`, {
+                method: 'DELETE',
                 headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': token
                 }
               });
 
@@ -181,6 +184,7 @@
 </div>
 
 <script>
+  const token = 'Bearer ' + localStorage.getItem('auth_token');
   document.getElementById('mailform').addEventListener('submit', async function (e) {
     e.preventDefault();  // Prevent default form submission
 
@@ -189,10 +193,12 @@
 
     try {
       // Send the data via a POST request using fetch
-      const response = await fetch('mc/post', {
+      const response = await fetch('http://127.0.0.1:8000/api/admin/mails/post', {
         method: 'POST',
         body: formData,
         headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
         }
       });
 
