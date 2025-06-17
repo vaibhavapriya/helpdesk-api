@@ -209,7 +209,7 @@ class TicketController extends Controller
     public function show(string $id)
     {
         // Retrieve the ticket with relationships
-        $ticket = Ticket::with(['image', 'replies'])->findOrFail($id);
+        $ticket = Ticket::with(['requester','image', 'replies'])->findOrFail($id);
 
         if (!auth()->check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
