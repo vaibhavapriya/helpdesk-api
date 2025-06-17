@@ -71,20 +71,19 @@
 
             // Attach change event to the radio button
             row.querySelector('.set-active-email').addEventListener('change', async (e) => {
-              const emailId = e.target.getAttribute('data-id');
-
+              const id= e.target.getAttribute('data-id');
               try {
-                const response = await fetch(`mc/activate`, {
-                  method: 'POST',
+                const response = await fetch(`http://127.0.0.1:8000/api/admin/mails/${id}`, {
+                  method: 'PATCH',
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': token
                   },
-                  body: JSON.stringify({ id: emailId })
                 });
 
                 const result = await response.json();
 
-                if (result.status === 'success') {
+                if (result.success === true) {
                   const successEl = document.getElementById('success');
                   successEl.classList.add('alert', 'alert-success');
                   successEl.textContent = 'Email marked as active.';
