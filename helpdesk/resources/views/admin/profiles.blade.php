@@ -21,7 +21,10 @@
                     <th>Role</th>
                     <th>Email</th>
                     <th>Phone No</th>
-                    <th>Delete</th> <!-- Removed Edit -->
+                    <!-- <th>Delete</th> <td>
+                            <i class="fa-solid fa-trash text-danger" 
+                               onclick="event.stopPropagation(); deleteUser(${user.user_id})"></i>
+                        </td> -->
                 </tr>
             </thead>
             <tbody id="userTableBody">
@@ -102,10 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${user.user.role}</td>
                         <td>${user.email}</td>
                         <td>${user.phone}</td>
-                        <td>
-                            <i class="fa-solid fa-trash text-danger" 
-                               onclick="event.stopPropagation(); deleteUser(${user.user_id})"></i>
-                        </td>
+                        
                     `;
                     tableBody.appendChild(row);
                 });
