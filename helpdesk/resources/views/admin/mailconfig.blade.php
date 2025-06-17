@@ -184,38 +184,39 @@
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
   const token = 'Bearer ' + localStorage.getItem('auth_token');
-  document.getElementById('mailform').addEventListener('submit', async function (e) {
-    e.preventDefault();  // Prevent default form submission
 
-    // Create a new FormData object from the form
+  // Fetch Emails on load
+  fetchEmails();
+
+  // Add Email Form Submit
+  document.getElementById('mailform').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
     const formData = new FormData(this);
 
     try {
-      // Send the data via a POST request using fetch
       const response = await fetch('http://127.0.0.1:8000/api/admin/mails/post', {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': token
         }
       });
 
-      // Wait for the response from the server
       const result = await response.text();
 
-      // Check if the response is successful
       if (result.includes('success')) {
-        $('#addEmailModal').modal('hide'); // Close modal on success
-        fetchEmails(); // Re-fetch emails or update table (optional)
-        const errorEl = document.getElementById('success');
-        errorEl.classList.add('alert', 'alert-success');
-        errorEl.textContent =  'email configuration added.';
+        $('#addEmailModal').modal('hide');
+        fetchEmails();
+        const successEl = document.getElementById('success');
+        successEl.classList.add('alert', 'alert-success');
+        successEl.textContent = 'Email configuration added.';
       } else {
         const errorEl = document.getElementById('error');
         errorEl.classList.add('alert', 'alert-danger');
-        errorEl.textContent =  'Failed to add email configuration.';
+        errorEl.textContent = 'Failed to add email configuration.';
       }
     } catch (error) {
       const errorEl = document.getElementById('error');
@@ -223,5 +224,7 @@
       errorEl.textContent = 'Error submitting the form. Please try again.';
     }
   });
+});
 </script>
+
 

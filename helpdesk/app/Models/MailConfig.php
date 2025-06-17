@@ -12,5 +12,6 @@ class MailConfig extends Model
 
     protected $table = 'mailconfigs';
 
-    protected $fillable = ['active'];
+    //protected $fillable = ['active'];
+    protected $guarded = [];
 }
