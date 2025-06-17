@@ -119,7 +119,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="mail" class="nav-link active">
+          <a href="{{ route('mail') }}" class="nav-link active">
           <i class="fas fa-envelope nav-icon"></i>
             <p>
               Mail

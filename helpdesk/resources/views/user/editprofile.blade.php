@@ -1,5 +1,4 @@
 @extends('components.layouts.app.client')
-
 @section('content')
 <div class="container">
     <div class="row mb-4 align-items-center p-5 bg-light">
@@ -63,11 +62,79 @@
 
         </div>
     </form>
+    <div id="passwordUpdateError" class="alert alert-danger d-none" role="alert"></div>
+    <div id="passwordUpdateSuccess" class="alert alert-success d-none" role="alert"></div>
+    <form id="passwordForm" enctype="multipart/form-data">
+        @csrf
+        <div class="row g-3">
+
+            <div class="mb-3">
+                <label for="old_Password" class="form-label">Old Password</label>
+                <input type="password" class="form-control" id="old_Password" name="old_password" required>
+            </div>
+
+            {{-- Password --}}
+            <div class="col-md-6">
+                <label class="form-label">Password</label>
+                <div class="form-control-plaintext d-none" id="new_password"></div>
+                <input type="password" class="form-control" name="new_password" required>
+                <div class="text-danger" id="error-password"></div>
+            </div>
+
+            {{-- Password --}}
+            <div class="col-md-6">
+                <label class="form-label">Confirm Password</label>
+                <div class="form-control-plaintext d-none" id="new_password_confirmation"></div>
+                <input type="password" class="form-control" name="new_password_confirmation" required>
+            </div>
+
+            <div class="col-12 text-end mt-3">
+                <button type="submit" id="cp" class="btn btn-successd">
+                    <i class="bi bi-check-circle"></i> Change Password
+                </button>
+
+            </div>
+
+        </div>
+    </form>
 </div>
 
 <script>
-        const userId = localStorage.getItem('user_id');
-        const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const userId = localStorage.getItem('user_id');
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const cp= document.getElementById('cp');
+    const pform = document.getElementById('passwordForm');
+    pform.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(pform);
+        formData.append('_method', 'PUT'); // Spoofing PUT request
+
+        async function changePassword() {
+            try {
+                const response = await fetch(`/api/profile/${userId}/updatePassword`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to change password');
+                const json = await response.json();
+                console.log(json);
+
+                alert('Password changed successfully!');
+                pform.reset(); // Optional: reset the form
+
+            } catch (error) {
+                console.error(error);
+                alert('Failed to change password.');
+            }
+        }
+
+        await changePassword(); // <-- You were missing this
+    });
     document.addEventListener('DOMContentLoaded', async () => {
         const editBtn = document.getElementById('editBtn');
         const saveBtn = document.getElementById('saveBtn');
@@ -130,7 +197,7 @@
                 });
 
                 // Set avatar image URL
-                avatarDisplay.src = data.image?.link || 'https://ssl.gstatic.com/accounts/ui/avatar_2x.png';
+                avatarDisplay.src = `http://127.0.0.1:8000/storage/${data.image.link}`|| 'https://ssl.gstatic.com/accounts/ui/avatar_2x.png';
 
             } catch (error) {
                 console.error(error);
@@ -206,3 +273,5 @@
     });
 </script>
 @endsection
+
+
