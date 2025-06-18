@@ -37,17 +37,14 @@
         </ul>
     </nav>
 </div>
-@endsection
-
 
 <script>
     const token = 'Bearer ' + localStorage.getItem('auth_token');
 
     let currentQuery = '';
-    let currentStatus = 'all';
+    let currentStatus = 'all'; // default
     let currentPageUrl = 'http://127.0.0.1:8000/api/admin/tickets';
 
-    // HTML escape helper
     function escapeHTML(str) {
         return str?.replace(/[&<>"']/g, match => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -80,10 +77,20 @@
         const tableBody = document.getElementById('tickets-table-body');
         const pagination = document.getElementById('pagination');
 
+        // Check if user is logged in
         if (!localStorage.getItem('auth_token')) {
             alert('You are not logged in. Redirecting to login.');
             window.location.href = '/login';
             return;
+        }
+
+        // Get status from query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const statusParam = urlParams.get('status');
+        if (statusParam) {
+            currentStatus = statusParam;
+            const statusFilter = document.getElementById('statusFilter');
+            if (statusFilter) statusFilter.value = statusParam;
         }
 
         // Fetch tickets with filters
@@ -124,13 +131,12 @@
                 const data = await response.json();
                 renderTickets(data.data);
                 renderPagination(data.meta);
-                currentPageUrl = finalUrl; // track current page with filters
+                currentPageUrl = finalUrl;
             } catch (error) {
                 console.error('Unexpected error:', error);
                 alert('Failed to fetch tickets.');
             }
         };
-
         const renderTickets = (tickets) => {
             tableBody.innerHTML = tickets.length
                 ? tickets.map(ticket => `
@@ -228,7 +234,6 @@
             }
         };
 
-        // Input and filter listeners
         document.getElementById('searchInput').addEventListener('input', debounce(() => {
             currentQuery = document.getElementById('searchInput').value;
             fetchTickets();
@@ -239,7 +244,11 @@
             fetchTickets();
         });
 
-        // Initial load
+        // ⬇️ Initial fetch
         fetchTickets();
     });
 </script>
+
+@endsection
+
+
