@@ -22,7 +22,7 @@ Route::group(['prefix'=>'myProfile'],function () {
 });
 
 Route::group(['prefix'=>'tickets'],function () {
-    Route::view('/','ticket.index')->name('tickets');;
+    Route::view('/','ticket.index')->name('tickets');
     Route::view('/create','ticket.create')->name('ticket');
     Route::get('/{id}',function($id){
         return view('ticket.show',compact('id'));

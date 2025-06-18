@@ -118,20 +118,9 @@ class TicketController extends Controller
         //Send email
         try {
             $userEmail = auth()->user()->email;
-
-            $activeMail = \App\Models\MailConfig::where('active', true)->first();
-            config([
-                'mail.mailers.smtp.host' => $activeMail->host,
-                'mail.mailers.smtp.port' => $activeMail->port,
-                'mail.mailers.smtp.encryption' => $activeMail->encryption,
-                'mail.mailers.smtp.username' => $activeMail->username,
-                'mail.mailers.smtp.password' => $activeMail->password, // decrypt if encrypted
-                'mail.from.address' => $activeMail->mail_from_address,
-                'mail.from.name' => $activeMail->mail_from_name,
-            ]);
-
-            Mail::mailer('smtp')->to($userEmail)->send(new TicketCreatedMail($ticket));
-
+            dispatch(new \App\Jobs\SendTicketCreatedMail($ticket, $userEmail));
+            //Mail::mailer('smtp')->to($userEmail)->send(new TicketCreatedMail($ticket));
+            //Mail::mailer('smtp')->to($userEmail)->queue(new TicketCreatedMail($ticket));
             return response()->json(['success' => true,'message' => 'Ticket created successfully and mail sent'], 201);
         } catch (\Exception $e) {
             \Log::error('Mail failed: ' . $e->getMessage());
@@ -181,19 +170,8 @@ class TicketController extends Controller
             $requester_id = $request->input('requester_id'); 
             $user=User::findorfail($requester_id);
             $userEmail = $user->email;
-
-            $activeMail = \App\Models\MailConfig::where('active', true)->first();
-            config([
-                'mail.mailers.smtp.host' => $activeMail->host,
-                'mail.mailers.smtp.port' => $activeMail->port,
-                'mail.mailers.smtp.encryption' => $activeMail->encryption,
-                'mail.mailers.smtp.username' => $activeMail->username,
-                'mail.mailers.smtp.password' => $activeMail->password, // decrypt if encrypted
-                'mail.from.address' => $activeMail->mail_from_address,
-                'mail.from.name' => $activeMail->mail_from_name,
-            ]);
-
-            Mail::mailer('smtp')->to($userEmail)->send(new TicketCreatedMail($ticket));
+            dispatch(new \App\Jobs\SendTicketCreatedMail($ticket, $userEmail));
+            //Mail::mailer('smtp')->to($userEmail)->queue(new TicketCreatedMail($ticket));
 
             return response()->json(['success' => true,'message' => 'Ticket created successfully and mail sent'], 201);
         } catch (\Exception $e) {
