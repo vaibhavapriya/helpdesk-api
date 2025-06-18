@@ -19,11 +19,12 @@ Route::post('/oauth/token', function (ServerRequestInterface $request) {
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
-
-Route::post('/login',[AuthController::class,'login'])->name('login-p');//done
-Route::post('/register',[AuthController::class,'register'])->name('register-p');//done
-Route::post('/forgot-password', [AuthController::class,'forgotP']);
-Route::post('/reset-password', [AuthController::class,'resetP']) ;
+Route::group(['middleware'=>'guest.api'],function () {
+    Route::post('/login',[AuthController::class,'login'])->name('login-p');//done
+    Route::post('/register',[AuthController::class,'register'])->name('register-p');//done
+    Route::post('/forgot-password', [AuthController::class,'forgotP']);
+    Route::post('/reset-password', [AuthController::class,'resetP']) ;
+});
 //accessToken
 Route::group(['middleware'=>'auth:api'],function () {
     Route::post('/logout', [AuthController::class, 'logout']);

@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'guest.api' => \App\Http\Middleware\GuestApi::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
