@@ -31,6 +31,16 @@
     const table = document.getElementById('ticketTable');
     const tbody = document.getElementById('tickets-table-body');
     document.addEventListener("DOMContentLoaded", function () {
+            if (!localStorage.getItem('auth_token')) {
+        alert('You are not logged in. Redirecting to login.');
+        window.location.href = "{{ route('login') }}";
+        return;
+    }
+    if (localStorage.getItem('user_role')!='admin') {
+        alert('You are admin. Redirecting to client.');
+        window.location.href = "{{ route('home') }}";
+        return;
+    }
     const tableBody = document.getElementById('tickets-table-body');
     const pagination = document.getElementById('pagination');
         const fetchErrors = async (url) => {

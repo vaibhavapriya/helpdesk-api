@@ -184,7 +184,19 @@
 </div>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function () {
+
+    if (!localStorage.getItem('auth_token')) {
+        alert('You are not logged in. Redirecting to login.');
+        window.location.href = "{{ route('login') }}";
+        return;
+    }
+    if (localStorage.getItem('user_role')!='admin') {
+        alert('You are admin. Redirecting to client.');
+        window.location.href = "{{ route('home') }}";
+        return;
+    }
   const token = 'Bearer ' + localStorage.getItem('auth_token');
 
   // Fetch Emails on load

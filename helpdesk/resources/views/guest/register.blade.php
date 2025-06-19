@@ -46,6 +46,7 @@
 </div>
 
 <script>
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
 document.getElementById('registerForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -68,7 +69,8 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Authorization': token
             },
             body: JSON.stringify(formData)
         });

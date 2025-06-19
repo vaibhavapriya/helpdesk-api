@@ -38,7 +38,18 @@
 @endsection
 
 <script>
+
   document.addEventListener('DOMContentLoaded', () => {
+    if (!localStorage.getItem('auth_token')) {
+        alert('You are not logged in. Redirecting to login.');
+        window.location.href = "{{ route('login') }}";
+        return;
+    }
+    if (localStorage.getItem('user_role')!='admin') {
+        alert('You are admin. Redirecting to client.');
+        window.location.href = "{{ route('home') }}";
+        return;
+    }
     const token = 'Bearer ' + localStorage.getItem('auth_token');
     let currentUserQuery = '';
     let currentUserPageUrl = 'http://127.0.0.1:8000/api/admin/profiles';

@@ -62,7 +62,18 @@
 </div>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', () => {
+    if (!localStorage.getItem('auth_token')) {
+        alert('You are not logged in. Redirecting to login.');
+        window.location.href = "{{ route('login') }}";
+        return;
+    }
+    if (localStorage.getItem('user_role')!='admin') {
+        alert('You are admin. Redirecting to client.');
+        window.location.href = "{{ route('home') }}";
+        return;
+    }
     const form = document.getElementById('edit-ticket-form');
     const errorMessages = document.getElementById('error-messages');
     const errorList = document.getElementById('error-list');

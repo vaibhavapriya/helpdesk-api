@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!localStorage.getItem('auth_token')) {
         alert('You are not logged in. Redirecting to login.');
-        window.location.href = '/login';
+        window.location.href = "{{ route('login') }}";
         return;
     }
 

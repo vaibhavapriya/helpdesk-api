@@ -28,7 +28,18 @@
 
 
 <script>
+
 document.addEventListener("DOMContentLoaded", () => {
+    if (!localStorage.getItem('auth_token')) {
+        alert('You are not logged in. Redirecting to login.');
+        window.location.href = "{{ route('login') }}";
+        return;
+    }
+    if (localStorage.getItem('user_role')!='admin') {
+        alert('You are admin. Redirecting to client.');
+        window.location.href = "{{ route('home') }}";
+        return;
+    }
     const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
     const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
     const token = 'Bearer ' + localStorage.getItem('auth_token');

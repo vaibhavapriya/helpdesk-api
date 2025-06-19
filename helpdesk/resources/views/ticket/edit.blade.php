@@ -69,6 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentAttachment = document.getElementById('current-attachment');
 
     const token = 'Bearer ' + localStorage.getItem('auth_token');
+    if (!token) {
+        // Not logged in, redirect to login
+        window.location.href = "{{ route('login') }}";
+    }
     const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
     const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
 

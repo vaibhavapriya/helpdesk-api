@@ -22,6 +22,7 @@
 </div>
 
 <script>
+  const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
   document.getElementById('forgotPasswordForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -37,6 +38,7 @@
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
+          'Authorization': token,
           "X-CSRF-TOKEN": "{{ csrf_token() }}"
         },
         body: JSON.stringify({ email })

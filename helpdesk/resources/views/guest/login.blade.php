@@ -44,6 +44,7 @@
 @endsection
 
 <script>
+    const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("l").addEventListener("submit", async function(e) {
         e.preventDefault();
@@ -70,7 +71,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Authorization': token
                 },
                 body: JSON.stringify(formData)
             });

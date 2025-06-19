@@ -35,6 +35,7 @@
     </div>
 </div>
 <script>
+    const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
 document.getElementById('reset-password-form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -54,6 +55,7 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'Authorization': token,
                 'X-CSRF-TOKEN': '{{ csrf_token() }}' // include if CSRF middleware is enabled on API route
             },
             body: JSON.stringify({ token, email, password, password_confirmation })
