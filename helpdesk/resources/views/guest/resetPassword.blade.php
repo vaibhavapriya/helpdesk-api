@@ -35,6 +35,7 @@
     </div>
 </div>
 <script>
+    const isAuthenticated = !!localStorage.getItem('auth_token');
     const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
 document.getElementById('reset-password-form').addEventListener('submit', async function(e) {
     e.preventDefault();

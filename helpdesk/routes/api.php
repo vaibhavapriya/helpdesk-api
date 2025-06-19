@@ -52,4 +52,22 @@ Route::group(['prefix'=>'admin','middleware'=>['auth:api','role:admin']],functio
     });
     Route::get('/errorlogs',[ErrorlogsController::class,'index']);//done
 });
-//view errorlogs, profile change password, mails index,store,upadate
+Route::get('/queue-driver', function () {
+    return response()->json([
+        'queue_driver' => Cache::get('queue_driver', config('queue.default')),
+    ]);
+});
+
+Route::post('/queue-driver', function (Request $request) {
+    $driver = $request->input('queue_driver');
+
+    // Optionally validate allowed drivers
+    $allowed = ['redis', 'database', 'sync', 'null'];
+    if (!in_array($driver, $allowed)) {
+        return response()->json(['error' => 'Invalid driver'], 422);
+    }
+
+    Cache::forever('queue_driver', $driver);
+
+    return response()->json(['message' => 'Queue driver updated', 'queue_driver' => $driver]);
+});

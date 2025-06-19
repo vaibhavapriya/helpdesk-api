@@ -45,7 +45,13 @@
 
 <script>
     const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
+    const isAuthenticated = !!localStorage.getItem('auth_token');
 document.addEventListener("DOMContentLoaded", function () {
+    if(!isAuthenticated){
+        alert('You are logged user.');
+        window.location.href = "{{ route('home') }}";
+        return;
+    }
     document.getElementById("l").addEventListener("submit", async function(e) {
         e.preventDefault();
         //const formData = new FormData(this);

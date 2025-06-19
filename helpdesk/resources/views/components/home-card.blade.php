@@ -9,3 +9,8 @@
         </div>
     </a>
 </div>
+            <x-home-card 
+                url="{{ route('kb') }}" 
+                icon="fa-solid fa-lightbulb" 
+                title="Knowledge Base" 
+                :col="auth()->check() ? 'col-md-4' : 'col-md-3'" />

@@ -23,6 +23,7 @@
 
 <script>
   const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
+  const isAuthenticated = !!localStorage.getItem('auth_token');
   document.getElementById('forgotPasswordForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 

@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'data' => [
                 'id' => $this->id,
                 'role' => $this->role, // ensure 'role' exists on your User model
+                'email' => $this->email, 
             ],
             // add other fields you want to expose
         ];

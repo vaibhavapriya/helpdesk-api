@@ -46,7 +46,8 @@
 </div>
 
 <script>
-    const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const isAuthenticated = !!localStorage.getItem('auth_token');
+    const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
 document.getElementById('registerForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -70,7 +71,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': token
+                'Authorization': token,
             },
             body: JSON.stringify(formData)
         });
