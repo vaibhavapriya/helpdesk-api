@@ -217,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             alert('Ticket created successfully!');
+            window.location.href = "{{ route('atickets') }}";
             form.reset();
             requesterSelect.classList.add('d-none');
             requesterSearch.value = '';

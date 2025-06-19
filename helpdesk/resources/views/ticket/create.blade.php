@@ -11,6 +11,13 @@
                 <h4 class="title mb-3">New Ticket</h4>
                 <p class="information text-muted">Please provide the following information about your query.</p>
                 
+                <!-- Email -->
+                <div class="form-group mt-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input class="form-control" id="email" name="email" type="text" placeholder="Email" readonly>
+                    <div class="invalid-feedback" id="email_error"></div>
+                </div>
+
                 <!-- Title -->
                 <div class="form-group mt-3">
                     <label for="title" class="form-label">Title</label>
@@ -65,6 +72,16 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('ticket-form');
     const token = 'Bearer ' + localStorage.getItem('auth_token');
+    // Get the input element
+    const email = document.getElementById('email');
+
+    // Get the stored email from localStorage
+    const storedEmail = localStorage.getItem('user_email');
+
+    // If found, set it as the input value
+    if (email && storedEmail) {
+        email.value = storedEmail;
+    }
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();

@@ -30,7 +30,7 @@
 
   if (!isAuthenticated) {
     cards.push({
-      url: '/register',
+      url: "{{ route('register') }}",
       icon: 'fa-regular fa-pen-to-square',
       title: 'Register',
       colClass: 'col-md-3'
@@ -41,19 +41,19 @@
 
   cards.push(
     {
-      url: '/ticket',
+      url: "{{ route('ticket') }}",
       icon: 'fa-solid fa-rectangle-list',
       title: 'Submit Ticket',
       colClass
     },
     {
-      url: '/tickets',
+      url:"{{ route('tickets') }}",
       icon: 'fa-regular fa-newspaper',
-      title: 'My Ticket',
+      title: 'My Tickets',
       colClass
     },
     {
-      url: '/kb',
+      url: "{{ route('kb') }}",
       icon: 'fa-solid fa-lightbulb',
       title: 'Knowledge Base',
       colClass

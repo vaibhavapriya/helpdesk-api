@@ -22,7 +22,7 @@
         </div>
     </form>
 
-    <a href="/tickets" class="btn btn-secondary mt-4">Back to List</a>
+    <a href="{{ route('atickets') }}" class="btn btn-secondary mt-4">Back to List</a>
 </div>
 @endsection
 

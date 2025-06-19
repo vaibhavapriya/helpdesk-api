@@ -45,9 +45,9 @@
 
 <script>
     const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
-    const isAuthenticated = !!localStorage.getItem('auth_token');
+    const isAuthenticated = localStorage.getItem('auth_token')??null;
 document.addEventListener("DOMContentLoaded", function () {
-    if(!isAuthenticated){
+    if(isAuthenticated){
         alert('You are logged user.');
         window.location.href = "{{ route('home') }}";
         return;
@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem('auth_token', data.meta.token);
                 localStorage.setItem('user_id', data.data.id);
                 localStorage.setItem('user_role', data.data.role);
+                localStorage.setItem('user_email', data.data.email);
                 //Redirect
                 window.location.href = data.redirect || '/';
             }
