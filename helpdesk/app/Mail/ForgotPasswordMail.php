@@ -18,6 +18,7 @@ use App\Models\User;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Address;
+use App\Helpers\MailHelper;
 
 class ForgotPasswordMail extends Mailable
 {
@@ -34,7 +35,9 @@ class ForgotPasswordMail extends Mailable
 
     public function build()
     {
-        $activeMail = \App\Models\MailConfig::where('active', true)->first();
+        $activeMail = MailConfig::where('active', true)->first();
+
+        MailHelper::setMailConfig();
 
         return $this->from($activeMail->mail_from_address, $activeMail->mail_from_name)
                     ->subject('Reset Password for ' . $this->user->email)

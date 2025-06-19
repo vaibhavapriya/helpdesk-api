@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\MailConfig;
 use App\Models\Ticket;
+use App\Helpers\MailHelper;
 
 class TicketCreatedMail extends Mailable
 {
@@ -57,17 +58,9 @@ class TicketCreatedMail extends Mailable
 
     public function build()
     {
-        $activeMail = \App\Models\MailConfig::where('active', true)->first();
-        config([
-            'mail.mailers.smtp.host' => $activeMail->host,
-            'mail.mailers.smtp.port' => $activeMail->port,
-            'mail.mailers.smtp.encryption' => $activeMail->encryption,
-            'mail.mailers.smtp.username' => $activeMail->username,
-            'mail.mailers.smtp.password' => $activeMail->password, // decrypt if encrypted
-            'mail.from.address' => $activeMail->mail_from_address,
-            'mail.from.name' => $activeMail->mail_from_name,
-        ]);
-        
+        $activeMail = MailConfig::where('active', true)->first();
+
+        MailHelper::setMailConfig();
         return $this->from($activeMail->mail_from_address, $activeMail->mail_from_name)
                     ->subject('New Ticket Created: ' . $this->ticket->title)
                     ->view('emails.ticket_created')

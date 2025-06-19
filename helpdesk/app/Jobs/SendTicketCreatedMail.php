@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketCreatedMail;
 use App\Models\MailConfig;
+use App\Helpers\MailHelper;
 
 class SendTicketCreatedMail implements ShouldQueue
 {
@@ -26,17 +27,7 @@ class SendTicketCreatedMail implements ShouldQueue
 
     public function handle(): void
     {
-        $activeMail = MailConfig::where('active', true)->first();
-
-        config([
-            'mail.mailers.smtp.host' => $activeMail->host,
-            'mail.mailers.smtp.port' => $activeMail->port,
-            'mail.mailers.smtp.encryption' => $activeMail->encryption,
-            'mail.mailers.smtp.username' => $activeMail->username,
-            'mail.mailers.smtp.password' => $activeMail->password,
-            'mail.from.address' => $activeMail->mail_from_address,
-            'mail.from.name' => $activeMail->mail_from_name,
-        ]);
+        MailHelper::setMailConfig();
 
         Mail::mailer('smtp')->to($this->userEmail)->send(new TicketCreatedMail($this->ticket));
     }
