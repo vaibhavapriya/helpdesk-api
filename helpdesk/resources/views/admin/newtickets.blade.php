@@ -69,26 +69,36 @@
                     <a href="#" class="terms">Terms & Conditions</a>
                 </div> 
 
-                <button type="submit" class="btn btn-primary btn-block confirm-button">Create</button>
+                <button type="submit" class="btn btn-primary btn-block confirm-button" id="submit-button">Create</button>
+
+                <!-- Loading Spinner -->
+                <div id="form-spinner" class="text-center mt-3 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Submitting...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Submitting ticket...</p>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-
 document.addEventListener('DOMContentLoaded', function () {
     if (!localStorage.getItem('auth_token')) {
         alert('You are not logged in. Redirecting to login.');
         window.location.href = "{{ route('login') }}";
         return;
     }
-    if (localStorage.getItem('user_role')!='admin') {
+    if (localStorage.getItem('user_role') != 'admin') {
         alert('You are admin. Redirecting to client.');
         window.location.href = "{{ route('home') }}";
         return;
     }
+
     const form = document.getElementById('ticket-form');
+    const submitButton = document.getElementById('submit-button');
+    const spinner = document.getElementById('form-spinner');
     const token = 'Bearer ' + localStorage.getItem('auth_token');
     const userId = localStorage.getItem('user_id');
     const userToggle = document.getElementById('user-toggle');
@@ -97,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const requesterSelect = document.getElementById('requester_id');
     let users = [];
 
-    // Fetch all users on load
     async function fetchUsers() {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/admin/useridemail', {
@@ -109,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!response.ok) throw new Error('Failed to load users');
             const data = await response.json();
             users = data.data;
-            // Populate select initially with all users
             populateRequesterOptions(users);
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -131,14 +139,12 @@ document.addEventListener('DOMContentLoaded', function () {
         requesterSelect.classList.remove('d-none');
     }
 
-    // Filter dropdown as user types
     requesterSearch.addEventListener('input', () => {
         const searchTerm = requesterSearch.value.toLowerCase();
         const filtered = users.filter(user => user.email.toLowerCase().includes(searchTerm));
         populateRequesterOptions(filtered);
     });
 
-    // When user selects from dropdown, update input and hide dropdown
     requesterSelect.addEventListener('change', () => {
         const selectedOption = requesterSelect.options[requesterSelect.selectedIndex];
         if (selectedOption) {
@@ -147,10 +153,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Set default requester_id to logged-in user
     document.getElementById('requester_id').value = userId;
 
-    // Toggle visibility of requester selection
     userToggle.addEventListener('change', () => {
         if (userToggle.value === 'self') {
             requesterContainer.style.display = 'none';
@@ -161,10 +165,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Initial fetch of users
     fetchUsers();
 
-    // Form submit handler
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -175,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (el) el.classList.remove('is-invalid');
         });
 
-        // Validate requester_id manually (make sure requester_id has a value)
+        // Validate requester_id manually
         if (!requesterSelect.value && userToggle.value === 'other') {
             document.getElementById('requester_id_error').textContent = 'Please select a requester.';
             requesterSearch.classList.add('is-invalid');
@@ -184,6 +186,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const formData = new FormData(form);
         formData.set('requester_id', userToggle.value === 'self' ? userId : requesterSelect.value);
+
+        // Show spinner and disable submit button
+        spinner.classList.remove('d-none');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
 
         try {
             const response = await fetch('http://127.0.0.1:8000/api/admin/tickets', {
@@ -199,7 +206,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (!response.ok) {
                 if (response.status === 422) {
-                    // Validation errors
                     for (const [field, messages] of Object.entries(data.errors)) {
                         const errorDiv = document.getElementById(`${field}_error`);
                         if (errorDiv) {
@@ -224,6 +230,11 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Unexpected error:', error);
             alert('Something went wrong.');
+        } finally {
+            // Hide spinner and re-enable submit button
+            spinner.classList.add('d-none');
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create';
         }
     });
 });
