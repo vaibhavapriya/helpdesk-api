@@ -50,13 +50,11 @@ Route::group(['prefix'=>'admin'],function () {
     });
     Route::view('/profiles','admin.profiles')->name('profiles');
     Route::view('/profile','admin.profile')->name('profile');
+    Route::view('/newuser','admin.newUsers')->name('newuser');
     Route::view('/errorlogs','admin.errorlog')->name('errorlog');
     Route::view('/mailconfig','admin.mailconfig')->name('mail');
     Route::get('/profile/{id}', function ($id) {
         return view('admin.usershow', compact('id'));
     })->name('profile.show');
-    //kb,ticketshowedit,profileshowedit/myProfile
+    //newUsers, deleteUsers(button), querys(index)
 });
-    Route::get('/profile/{id}', function ($id) {
-        return view('admin.usershow', compact('id'));
-    })->name('profile.show');

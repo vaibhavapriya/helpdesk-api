@@ -28,7 +28,10 @@ class ProfileController extends Controller
                 ->orWhere('lastname', 'like', '%' . $queryParam . '%')
                 ->orWhere('email', 'like', '%' . $queryParam . '%')
                 ->orWhere('phone', 'like', '%' . $queryParam . '%')
-                ->orWhere('user_id', 'like', '%' . $queryParam . '%');
+                ->orWhere('user_id', 'like', '%' . $queryParam . '%')
+                ->orWhereHas('user', function ($uq) use ($queryParam) {
+                    $uq->where('role', 'like', '%' . $queryParam . '%');
+                });
             });
         }
 
