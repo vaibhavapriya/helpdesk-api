@@ -151,11 +151,11 @@
         const renderTickets = (tickets) => {
             tableBody.innerHTML = tickets.length
                 ? tickets.map(ticket => `
-                    <tr class="ticket-row" data-id="${ticket.id}">
-                        <td>${ticket.id}</td>
-                        <td>${escapeHTML(ticket.title)}</td>
+                    <tr data-id="${ticket.id}">
+                        <td class="clickable-id" style="cursor:pointer; color:blue;">${ticket.id}</td>
+                        <td class="clickable-title" style="cursor:pointer; color:blue;">${escapeHTML(ticket.title)}</td>
                         <td>${capitalize(ticket.priority)}</td>
-                        <td><span class="badge bg-${getStatusBadge(ticket.status)}">${capitalize(ticket.status)}</span></td>
+                        <td><span class="badge bg-${getStatusBadge(ticket.status)} clickable-status" style="cursor:pointer;">${capitalize(ticket.status)}</span></td>
                         <td>${escapeHTML(ticket.department)}</td>
                         <td>
                             <a href="/admin/tickets/${ticket.id}/edit" class="btn btn-warning btn-sm">Edit</a>
@@ -165,11 +165,25 @@
                 `).join('')
                 : '<tr><td colspan="6" class="text-center">No tickets found.</td></tr>';
 
-            // Row click
-            tableBody.querySelectorAll('.ticket-row').forEach(row => {
-                row.addEventListener('click', function () {
-                    const id = this.dataset.id;
+            // Add event listeners:
+
+            // Navigate on ID or Title click
+            tableBody.querySelectorAll('.clickable-id, .clickable-title').forEach(cell => {
+                cell.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr');
+                    const id = row.dataset.id;
                     window.location.href = `/admin/tickets/${id}`;
+                });
+            });
+
+            // Filter by status badge click
+            tableBody.querySelectorAll('.clickable-status').forEach(badge => {
+                badge.addEventListener('click', (e) => {
+                    e.stopPropagation();  // Prevent row click event
+                    const statusText = e.target.textContent.trim();
+                    currentStatus = statusText;
+                    document.getElementById('statusFilter').value = statusText;
+                    fetchTickets();
                 });
             });
 
@@ -182,6 +196,7 @@
                 });
             });
         };
+
 
         const renderPagination = (meta) => {
             pagination.innerHTML = '';
