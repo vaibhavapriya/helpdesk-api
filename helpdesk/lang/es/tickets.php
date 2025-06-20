@@ -1,0 +1,20 @@
+<?php
+return [
+    'new_ticket' => 'Nuevo Ticket',
+    'info_text' => 'Por favor proporcione la siguiente información sobre su consulta.',
+    'email' => 'Correo electrónico',
+    'title' => 'Título',
+    'priority' => 'Prioridad',
+    'high' => 'Alta',
+    'medium' => 'Media',
+    'low' => 'Baja',
+    'department' => 'Departamento',
+    'description' => 'Descripción',
+    'attachment' => 'Adjunto',
+    'terms' => 'Términos y Condiciones',
+    'submit' => 'Crear',
+    'email_placeholder' => 'Correo electrónico',
+    'title_placeholder' => 'Título',
+    'department_placeholder' => 'Departamento',
+    'description_placeholder' => 'Descripción',
+];

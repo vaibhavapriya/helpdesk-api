@@ -36,6 +36,30 @@ class LangController extends Controller
             'locale' => $locale,
         ]);
     }
+    public function getNewticket()
+    {
+        return response()->json([
+            'new_ticket' => __('tickets.new_ticket'),
+            'info_text' => __('tickets.info_text'),
+            'email' => __('tickets.email'),
+            'title' => __('tickets.title'),
+            'priority' => __('tickets.priority'),
+            'high' => __('tickets.high'),
+            'medium' => __('tickets.medium'),
+            'low' => __('tickets.low'),
+            'department' => __('tickets.department'),
+            'description' => __('tickets.description'),
+            'attachment' => __('tickets.attachment'),
+            'terms' => __('tickets.terms'),
+            'submit' => __('tickets.submit'),
+            'placeholders' => [
+                'email' => __('tickets.email_placeholder'),
+                'title' => __('tickets.title_placeholder'),
+                'department' => __('tickets.department_placeholder'),
+                'description' => __('tickets.description_placeholder'),
+            ]
+        ]);
+    }
 
 
     public function getFaqByLanguage($lang)
