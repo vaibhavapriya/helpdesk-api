@@ -44,6 +44,11 @@ Route::group(['prefix'=>'admin','middleware'=>['auth:api','role:admin']],functio
     Route::get('/tickets',[TicketController::class,'indexAdmin']);//done add querytring
     Route::get('/useridemail',[ProfileController::class,'getUsersIdAndEmail']);//done
     Route::get('/profiles',[ProfileController::class,'index']);//done
+    Route::prefix('profiles')->group(function () {
+        Route::get('/', [ProfileController::class, 'index']);
+        Route::post('/post', [ProfileController::class, 'store']);
+        Route::delete('/delete/{id}', [ProfileController::class, 'destroy']);
+    });
     Route::prefix('mails')->group(function () {
         Route::get('/', [MailconfigController::class, 'index']);
         Route::post('/post', [MailconfigController::class, 'store']);

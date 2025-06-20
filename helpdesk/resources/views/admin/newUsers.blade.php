@@ -1,43 +1,40 @@
 @extends('components.layouts.app.admin')
 
 @section('content')
-<div class="container mt-5">
-    <h2 class="mb-4">New User</h2>
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <form id="registerForm">
-                @csrf
+<div class="container mt-5 mb-5 d-flex justify-content-center">
+    <div class="card px-1 py-4 col-lg-7">
+        <div class="row justify-content-center p-12">  
+                <form id="registerForm">
+                    @csrf
+                    <h2 class="mb-4">New User</h2>
+                    <div class="mb-3">
+                        <label>First Name</label>
+                        <input type="text" class="form-control" name="firstname" required>
+                        <div class="text-danger" id="error-firstname"></div>
+                    </div>
 
-                <div class="mb-3">
-                    <label>First Name</label>
-                    <input type="text" class="form-control" name="firstname" required>
-                    <div class="text-danger" id="error-firstname"></div>
-                </div>
+                    <div class="mb-3">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" name="lastname" required>
+                        <div class="text-danger" id="error-lastname"></div>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Last Name</label>
-                    <input type="text" class="form-control" name="lastname" required>
-                    <div class="text-danger" id="error-lastname"></div>
-                </div>
+                    <div class="mb-3">
+                        <label>Email address</label>
+                        <input type="email" class="form-control" name="email" required>
+                        <div class="text-danger" id="error-email"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="client">Client</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <div class="invalid-feedback" id="status_error"></div>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Email address</label>
-                    <input type="email" class="form-control" name="email" required>
-                    <div class="text-danger" id="error-email"></div>
-                </div>
-                <div class="mb-3">
-                    <label for="role" class="form-label">Role</label>
-                    <select class="form-select" id="role" name="role" required>
-                        <option value="client">Client</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                    <div class="invalid-feedback" id="status_error"></div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Register</button>
-            </form>
-
-            <p class="mt-3">Already have an account? <a href="{{ route('login') }}">Login</a></p>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
         </div>
     </div>
 </div>

@@ -1,11 +1,22 @@
 @extends('components.layouts.app.admin')
 
 @section('content')
-    <div class="row justify-content-center row mb-3">
+    <div class="row mb-3">
         <div class="col-md-6">
             <input type="text" id="searchInput" class="form-control" placeholder="Search Users...">
         </div>
-    </div>
+        <div class="col-md-3">
+            <select id="roleFilter" class="form-select">
+                <option value="">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="client">Client</option>
+                <option value="agent">Agent</option>
+            </select>
+        </div>
+        <div class="col-md-3 text-end">
+            <a href="{{ route('newuser') }}" class="btn btn-success">+ New User</a>
+        </div>
+</div>
 
     <h2 class="mb-4">Users</h2>
 
@@ -16,15 +27,11 @@
             <thead class="table-primary">
                 <tr>
                     <th>User ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Name</th>
                     <th>Role</th>
                     <th>Email</th>
                     <th>Phone No</th>
-                    <!-- <th>Delete</th> <td>
-                            <i class="fa-solid fa-trash text-danger" 
-                               onclick="event.stopPropagation(); deleteUser(${user.user_id})"></i>
-                        </td> -->
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody id="userTableBody">
@@ -39,23 +46,25 @@
         </ul>
     </nav>
 @endsection
-
 <script>
-
 document.addEventListener('DOMContentLoaded', () => {
     if (!localStorage.getItem('auth_token')) {
         alert('You are not logged in. Redirecting to login.');
         window.location.href = "{{ route('login') }}";
         return;
     }
-    if (localStorage.getItem('user_role')!='admin') {
-        alert('You are admin. Redirecting to client.');
+    if (localStorage.getItem('user_role') !== 'admin') {
+        alert('You are not an admin. Redirecting to client.');
         window.location.href = "{{ route('home') }}";
         return;
     }
+
     const token = 'Bearer ' + localStorage.getItem('auth_token');
-    let currentUserQuery = '';
+    let currentSearchText = '';
+    let currentRole = '';
     let currentUserPageUrl = 'http://127.0.0.1:8000/api/admin/profiles';
+
+    const dropdown = document.getElementById('roleFilter');
 
     function debounce(func, delay) {
         let timer;
@@ -68,18 +77,23 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchUsers(url = null) {
         const tableBody = document.getElementById('userTableBody');
         const statusDiv = document.getElementById('status');
-        const pagination = document.getElementById('pagination');
 
         const baseUrl = url || 'http://127.0.0.1:8000/api/admin/profiles';
-        const queryParams = new URLSearchParams();
 
-        if (currentUserQuery.trim()) {
-            queryParams.append('query', currentUserQuery.trim());
+        const urlObj = new URL(baseUrl);
+
+        urlObj.searchParams.delete('query');
+        urlObj.searchParams.delete('role');
+
+        if (currentSearchText.trim()) {
+            urlObj.searchParams.set('query', currentSearchText.trim());
         }
 
-        const finalUrl = baseUrl.includes('?')
-            ? `${baseUrl}&${queryParams.toString()}`
-            : `${baseUrl}?${queryParams.toString()}`;
+        if (currentRole.trim()) {
+            urlObj.searchParams.set('role', currentRole.trim());
+        }
+
+        const finalUrl = urlObj.toString();
 
         try {
             const response = await fetch(finalUrl, {
@@ -91,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const result = await response.json();
+
             tableBody.innerHTML = '';
             statusDiv.textContent = '';
 
@@ -105,19 +120,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 users.forEach(user => {
                     const row = document.createElement('tr');
                     row.style.cursor = 'pointer';
-                    row.onclick = () => {
-                        window.location.href = `/admin/profile/${user.user_id}`;
-                    };
 
+                    // Fill in user data here:
                     row.innerHTML = `
                         <td>${user.user_id}</td>
-                        <td>${user.firstname}</td>
-                        <td>${user.lastname}</td>
+                        <td>${user.firstname} ${user.lastname}</td>
                         <td>${user.user.role}</td>
                         <td>${user.email}</td>
                         <td>${user.phone}</td>
-                        
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${user.user_id})">Delete</button></td>
                     `;
+
                     tableBody.appendChild(row);
                 });
 
@@ -133,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusDiv.textContent = 'Server error. Please try again.';
         }
     }
+
 
     function renderPagination(meta) {
         const pagination = document.getElementById('pagination');
@@ -174,9 +188,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('searchInput').addEventListener('input', debounce(() => {
-        currentUserQuery = document.getElementById('searchInput').value;
-        fetchUsers(); // Triggers reload with query
+        currentSearchText = document.getElementById('searchInput').value.trim();
+        fetchUsers();
     }, 400));
+
+    document.getElementById('roleFilter').addEventListener('change', () => {
+        currentRole = document.getElementById('roleFilter').value;
+        fetchUsers();
+    });
 
     fetchUsers(); // Initial load
 });
@@ -187,7 +206,7 @@ function deleteUser(userId) {
 
     const token = 'Bearer ' + localStorage.getItem('auth_token');
 
-    fetch(`http://127.0.0.1:8000/api/profile/${userId}/delete`, {
+    fetch(`http://127.0.0.1:8000/api/admin/profiles/delete/${userId}`, {
         method: 'DELETE',
         headers: {
             'Authorization': token,
@@ -209,6 +228,4 @@ function deleteUser(userId) {
     });
 }
 </script>
-
-
 

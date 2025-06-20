@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreprofileRequest;
 use App\Http\Requests\UpdateprofileRequest;
@@ -19,6 +20,7 @@ class ProfileController extends Controller
     public function index(Request $request)
     {
         $queryParam = $request->query('query');
+        $roleFilter = $request->query('role'); // <-- New: get the role filter
 
         $profilesQuery = Profile::with('user')->latest();
 
@@ -28,12 +30,29 @@ class ProfileController extends Controller
                 ->orWhere('lastname', 'like', '%' . $queryParam . '%')
                 ->orWhere('email', 'like', '%' . $queryParam . '%')
                 ->orWhere('phone', 'like', '%' . $queryParam . '%')
-                ->orWhere('user_id', 'like', '%' . $queryParam . '%')
-                ->orWhereHas('user', function ($uq) use ($queryParam) {
-                    $uq->where('role', 'like', '%' . $queryParam . '%');
-                });
+                ->orWhere('user_id', 'like', '%' . $queryParam . '%');
             });
         }
+
+        if ($roleFilter) {
+            // Add role-based filtering using the related user
+            $profilesQuery->whereHas('user', function ($q) use ($roleFilter) {
+                $q->where('role', $roleFilter);
+            });
+        }
+
+        // if ($queryParam) {
+        //     $profilesQuery->where(function ($q) use ($queryParam) {
+        //         $q->where('firstname', 'like', '%' . $queryParam . '%')
+        //         ->orWhere('lastname', 'like', '%' . $queryParam . '%')
+        //         ->orWhere('email', 'like', '%' . $queryParam . '%')
+        //         ->orWhere('phone', 'like', '%' . $queryParam . '%')
+        //         ->orWhere('user_id', 'like', '%' . $queryParam . '%')
+        //         ->orWhereHas('user', function ($uq) use ($queryParam) {
+        //             $uq->where('role', 'like', '%' . $queryParam . '%');
+        //         });
+        //     });
+        // }
 
         $profiles = $profilesQuery->paginate(15);
 
@@ -58,15 +77,38 @@ class ProfileController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreprofileRequest $request)
+    public function store(Request $request)
     {
-        //
+        $user = User::create([
+            'name' => $request->firstname . ' ' . $request->lastname,
+            'email' => $request->email,
+            'password' => Hash::make($request->email),
+            'role' => $request->role,
+        ]);
+        $profile = Profile::create([
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'user_id'=>$user->id,
+            'email' => $request->email,
+            'phone' => $request->phone ?? '',
+        ]);
+
+        // Optional: auto-login the user
+        // Auth::login($user);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'msg' => "User registered successfully",
+                'user' => $user, // Optional: expose necessary fields only
+            ],
+        ]);
     }
 
     /**
@@ -158,8 +200,22 @@ class ProfileController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        DB::transaction(function () use ($id) {
+            $user = User::with('profile')->findOrFail($id);
+
+            if ($user->profile) {
+                $user->profile->delete();
+            }
+
+            $user->delete();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully',
+        ]);
     }
+
 
     public function getUsersIdAndEmail()
     {
