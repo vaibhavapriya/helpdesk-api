@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'guest.api' => \App\Http\Middleware\GuestApi::class,
+            'lang' => \App\Http\Middleware\SetLocale::class,
 
         ]);
     })

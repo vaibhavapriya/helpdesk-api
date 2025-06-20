@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MailconfigController;
 use App\Http\Controllers\Api\ErrorlogsController;
 use App\Http\Controllers\Api\QueueController;
 use App\Http\Controllers\Api\CacheController;
+use App\Http\Controllers\Api\LangController;
 
 use Laravel\Passport\Http\Controllers\AccessTokenController;
 use Psr\Http\Message\ServerRequestInterface;
@@ -64,11 +65,9 @@ Route::group(['prefix'=>'admin','middleware'=>['auth:api','role:admin']],functio
     Route::get('cache-driver', [CacheController::class, 'getDriver']);
     Route::post('cache-driver', [CacheController::class, 'setDriver']);
 });
-// Cache endpoints
-Route::get('/admin/cache/connection', [CacheController::class, 'connection']);
-Route::post('/admin/cache/connection', [CacheController::class, 'setConnection']);
+Route::group(['middleware'=>['web','lang']],function () {
+    Route::get('/faq', [LangController::class, 'getFaq']);
+    Route::post('/locale', [LangController::class, 'setLocale']);
+});
 
-// Queue endpoints
-Route::get('/admin/queue/connection', [QueueController::class, 'connection']);
-Route::post('/admin/queue/connection', [QueueController::class, 'setConnection']);
 
