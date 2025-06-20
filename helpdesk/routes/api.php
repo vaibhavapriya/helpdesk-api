@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\ReplyController;
 use App\Http\Controllers\Api\MailconfigController;
 use App\Http\Controllers\Api\ErrorlogsController;
+use App\Http\Controllers\Api\QueueController;
+use App\Http\Controllers\Api\CacheController;
 
 use Laravel\Passport\Http\Controllers\AccessTokenController;
 use Psr\Http\Message\ServerRequestInterface;
@@ -56,23 +58,17 @@ Route::group(['prefix'=>'admin','middleware'=>['auth:api','role:admin']],functio
         Route::patch('/{id}', [MailconfigController::class, 'update']);
     });
     Route::get('/errorlogs',[ErrorlogsController::class,'index']);//done
+    Route::get('/queue-driver', [QueueController::class, 'getDriver']);
+    Route::post('/queue-driver', [QueueController::class, 'setDriver']);
+        // Cache driver retrieval and update
+    Route::get('cache-driver', [CacheController::class, 'getDriver']);
+    Route::post('cache-driver', [CacheController::class, 'setDriver']);
 });
-Route::get('/queue-driver', function () {
-    return response()->json([
-        'queue_driver' => Cache::get('queue_driver', config('queue.default')),
-    ]);
-});
+// Cache endpoints
+Route::get('/admin/cache/connection', [CacheController::class, 'connection']);
+Route::post('/admin/cache/connection', [CacheController::class, 'setConnection']);
 
-Route::post('/queue-driver', function (Request $request) {
-    $driver = $request->input('queue_driver');
+// Queue endpoints
+Route::get('/admin/queue/connection', [QueueController::class, 'connection']);
+Route::post('/admin/queue/connection', [QueueController::class, 'setConnection']);
 
-    // Optionally validate allowed drivers
-    $allowed = ['redis', 'database', 'sync', 'null'];
-    if (!in_array($driver, $allowed)) {
-        return response()->json(['error' => 'Invalid driver'], 422);
-    }
-
-    Cache::forever('queue_driver', $driver);
-
-    return response()->json(['message' => 'Queue driver updated', 'queue_driver' => $driver]);
-});

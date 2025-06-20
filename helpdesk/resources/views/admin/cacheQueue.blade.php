@@ -2,131 +2,127 @@
 
 @section('content')
 <div class="container">
-    <h2>Two Tables with Radio Buttons</h2>
+    <h2>Queue & Cache Driver Configuration</h2>
+
     <div class="row">
-        <!-- Table 1 -->
+        <!-- Queue Driver Table -->
         <div class="col-md-6">
-            <h4>Table 1</h4>
+            <h4>Queue Drivers</h4>
             <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>Select</th>
-                        <th>Name</th>
-                        <th>Status</th>
+                        <th>Driver</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- beanstalkd -->
+                    @foreach(['sync', 'database', 'redis', 'null'] as $driver)
                     <tr>
-                        <td><input type="radio" name="table1" value="user1" onchange="handleChange(this)"></td>
-                        <td>Alice</td>
-                        <td>Active</td>
+                        <td>
+                            <input type="radio" name="queue_driver" value="{{ $driver }}" onchange="handleDriverChange(this)">
+                        </td>
+                        <td>{{ ucfirst($driver) }}</td>
+                        <td>{{ ucfirst($driver) }} queue driver</td>
                     </tr>
-                    <tr>
-                        <td><input type="radio" name="table1" value="user2" onchange="handleChange(this)"></td>
-                        <td>Bob</td>
-                        <td>Inactive</td>
-                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
 
-        <!-- Table 2 -->
+        <!-- Cache Driver Table -->
         <div class="col-md-6">
-            <h4>Table 2</h4>
+            <h4>Cache Drivers</h4>
             <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>Select</th>
-                        <th>Name</th>
-                        <th>Status</th>
+                        <th>Driver</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- memcache -->
+                    @foreach(['file', 'redis', 'array', 'database'] as $driver)
                     <tr>
-                        <td><input type="radio" name="table2" value="user3" onchange="handleChange(this)"></td>
-                        <td>Charlie</td>
-                        <td>Active</td>
+                        <td>
+                            <input type="radio" name="cache_driver" value="{{ $driver }}" onchange="handleDriverChange(this)">
+                        </td>
+                        <td>{{ ucfirst($driver) }}</td>
+                        <td>{{ ucfirst($driver) }} cache driver</td>
                     </tr>
-                    <tr>
-                        <td><input type="radio" name="table2" value="user4" onchange="handleChange(this)"></td>
-                        <td>Diana</td>
-                        <td>Inactive</td>
-                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
     </div>
+
+    <div id="statusMessage" class="alert alert-info d-none mt-3"></div>
 </div>
 
-<!-- JavaScript -->
 <script>
-    function handleChange(radio) {
-        const value = radio.value;
-        const tableGroup = radio.name;
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
 
-        console.log("Selected:", value, "from", tableGroup);
-
-        // Send the selected value to backend
-        fetch('/api/radio-selection', {
-            method: 'POST',
+    // Helper to fetch with auth and JSON
+    async function authFetch(url, options = {}) {
+        return fetch(url, {
+            ...options,
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}' // for Laravel
-            },
-            body: JSON.stringify({
-                selected_user: value,
-                table: tableGroup
-            })
-        })
-        .then(response => response.json())
-        .then(data => console.log('Response:', data))
-        .catch(error => console.error('Error:', error));
-    }
-</script>
-@endsection
-
-<!-- <body class="p-4">
-<div class="container">
-  <h2>Change Queue Driver</h2>
-  <div class="mb-3">
-    <label for="queueSelect" class="form-label">Select Queue Driver:</label>
-    <select id="queueSelect" class="form-select" onchange="updateQueueDriver()">
-      <option value="database">Database</option>
-      <option value="redis">Redis</option>
-      <option value="sync">Sync</option>
-      <option value="null">Null</option>
-    </select>
-  </div>
-  <div id="statusMessage" class="alert alert-info d-none"></div>
-</div>
-
-<script>
-    // Load current queue driver on page load
-    fetch('/api/queue-driver')
-        .then(res => res.json())
-        .then(data => {
-            const current = data.queue_driver;
-            document.getElementById('queueSelect').value = current;
+                'Authorization': token,
+                ...(options.headers || {})
+            }
         });
+    }
 
-    function updateQueueDriver() {
-        const selected = document.getElementById('queueSelect').value;
+    // Fetch current queue & cache drivers and mark them as selected
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const [queueRes, cacheRes] = await Promise.all([
+                authFetch('/api/admin/queue-driver'),
+                authFetch('/api/admin/cache-driver')
+            ]);
 
-        fetch('/api/queue-driver', {
+            const queue = await queueRes.json();
+            const cache = await cacheRes.json();
+
+            if (queue.driver) {
+                document.querySelector(`input[name="queue_driver"][value="${queue.driver}"]`)?.setAttribute('checked', true);
+            }
+
+            if (cache.driver) {
+                document.querySelector(`input[name="cache_driver"][value="${cache.driver}"]`)?.setAttribute('checked', true);
+            }
+        } catch (error) {
+            console.error('Error loading drivers:', error);
+            alert('Failed to load current driver settings.');
+        }
+    });
+
+    function handleDriverChange(radio) {
+        const type = radio.name === 'queue_driver' ? 'queue' : 'cache';
+        const endpoint = `/api/admin/${type}-driver`;
+        const value = radio.value;
+
+        authFetch(endpoint, {
             method: 'POST',
+            body: JSON.stringify({ driver: value }),
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}' // if using web middleware
-            },
-            body: JSON.stringify({ queue_driver: selected })
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
         })
         .then(res => res.json())
         .then(data => {
             const msg = document.getElementById('statusMessage');
             msg.classList.remove('d-none');
-            msg.textContent = `Queue driver changed to ${data.queue_driver}`;
+            msg.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} driver updated to "${value}"`;
         })
-        .catch(err => alert('Error updating queue driver.'));
+        .catch(err => {
+            console.error(err);
+            alert('Failed to update driver.');
+        });
     }
 </script>
-</body> -->
+
+@endsection
