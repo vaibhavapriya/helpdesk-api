@@ -96,7 +96,7 @@
               <li class="nav-item">
                 <a href="{{ route('atickets') }}" class="nav-link">
                   <!-- <i class="far fa-circle nav-icon"></i> -->
-                  <i class="fas fa-database nav-icon"></i>
+                  <i class="fas fa-list nav-icon"></i>
                   <p>View Tickets</p>
                 </a>
               </li>
@@ -128,7 +128,7 @@
           </li>
           <li class="nav-item menu-open">
             <a href="{{ route('config') }}" class="nav-link active">
-              <i class="fa-solid fa-ticket nav-icon"></i>
+              <i class="fas fa-cogs nav-icon"></i>  <!-- config icon -->
               <p>
                 Configs
                 <i class="right fas fa-angle-left"></i>
@@ -137,14 +137,13 @@
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <a href="{{ route('config') }}" class="nav-link">
-                  <i class="far fa-newspaper nav-icon"></i>
+                  <i class="fas fa-list-alt nav-icon"></i>  <!-- queue icon -->
                   <p>Queue</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="{{ route('config') }}" class="nav-link">
-                  <!-- <i class="far fa-circle nav-icon"></i> -->
-                  <i class="fas fa-database nav-icon"></i>
+                  <i class="fas fa-database nav-icon"></i>  <!-- cache icon -->
                   <p>Cache</p>
                 </a>
               </li>
