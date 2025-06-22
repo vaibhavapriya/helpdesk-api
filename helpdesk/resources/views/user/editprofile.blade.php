@@ -3,7 +3,7 @@
 <div class="container">
     <div class="row mb-4 align-items-center p-5 bg-light">
         <div class="col-md-8">
-            <h2 class="mb-0">User Profile</h2>
+            <h2 id="profile-title" class="mb-0">User Profile</h2>
         </div>
         <div class="col-md-4 text-md-end text-center">
             <img id="avatar_display" src="https://ssl.gstatic.com/accounts/ui/avatar_2x.png" class="rounded-circle img-thumbnail" alt="User Avatar" width="100">
@@ -16,35 +16,35 @@
 
             {{-- First Name --}}
             <div class="col-md-6">
-                <label class="form-label">First Name</label>
+                <label class="form-label" id="label-firstname">First Name</label>
                 <div class="form-control-plaintext d-none" id="firstname_display"></div>
                 <input type="text" name="firstname" id="firstname" class="form-control d-none" value="">
             </div>
 
             {{-- Last Name --}}
             <div class="col-md-6">
-                <label class="form-label">Last Name</label>
+                <label class="form-label" id="label-lastname">Last Name</label>
                 <div class="form-control-plaintext d-none" id="lastname_display"></div>
                 <input type="text" name="lastname" id="lastname" class="form-control d-none" value="">
             </div>
 
             {{-- Phone --}}
             <div class="col-md-6">
-                <label class="form-label">Phone</label>
+                <label class="form-label" id="label-phone">Phone</label>
                 <div class="form-control-plaintext d-none" id="phone_display"></div>
                 <input type="text" name="phone" id="phone" class="form-control d-none" value="">
             </div>
 
             {{-- Email --}}
             <div class="col-md-6">
-                <label class="form-label">Email</label>
+                <label class="form-label" id="label-email">Email</label>
                 <div class="form-control-plaintext d-none" id="email_display"></div>
                 <input type="email" name="email" id="email" class="form-control d-none" value="">
             </div>
 
             {{-- Avatar --}}
             <div class="col-12">
-                <label class="form-label">Profile Picture</label>
+                <label class="form-label" id="label-profile-picture">Profile Picture</label>
                 <input type="file" name="avatar" id="avatar" class="form-control d-none">
             </div>
 
@@ -69,13 +69,13 @@
         <div class="row g-3">
 
             <div class="mb-3">
-                <label for="old_Password" class="form-label">Old Password</label>
+                <label for="old_Password" class="form-label" id="label-old-password">Old Password</label>
                 <input type="password" class="form-control" id="old_Password" name="old_password" required>
             </div>
 
             {{-- Password --}}
             <div class="col-md-6">
-                <label class="form-label">Password</label>
+                <label class="form-label" id="label-new-password">Password</label>
                 <div class="form-control-plaintext d-none" id="new_password"></div>
                 <input type="password" class="form-control" name="new_password" required>
                 <div class="text-danger" id="error-password"></div>
@@ -83,13 +83,13 @@
 
             {{-- Password --}}
             <div class="col-md-6">
-                <label class="form-label">Confirm Password</label>
+                <label class="form-label" id="label-confirm-password">Confirm Password</label>
                 <div class="form-control-plaintext d-none" id="new_password_confirmation"></div>
                 <input type="password" class="form-control" name="new_password_confirmation" required>
             </div>
 
             <div class="col-12 text-end mt-3">
-                <button type="submit" id="cp" class="btn btn-successd">
+                <button type="submit" id="cp" class="btn btn-success">
                     <i class="bi bi-check-circle"></i> Change Password
                 </button>
 
@@ -102,44 +102,18 @@
 <script>
     const userId = localStorage.getItem('user_id');
     const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const lang = localStorage.getItem('lang') || 'en';
+    let t = {};
+
     const cp= document.getElementById('cp');
     const pform = document.getElementById('passwordForm');
-    pform.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(pform);
-        formData.append('_method', 'PUT'); // Spoofing PUT request
+    const editBtn = document.getElementById('editBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const form = document.getElementById('profileForm');
 
-        async function changePassword() {
-            try {
-                const response = await fetch(`/api/profile/${userId}/updatePassword`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': token
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error('Failed to change password');
-                const json = await response.json();
-                console.log(json);
-
-                alert('Password changed successfully!');
-                pform.reset(); // Optional: reset the form
-
-            } catch (error) {
-                console.error(error);
-                alert('Failed to change password.');
-            }
-        }
-
-        await changePassword(); // <-- You were missing this
-    });
     document.addEventListener('DOMContentLoaded', async () => {
-        const editBtn = document.getElementById('editBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const form = document.getElementById('profileForm');
+        await loadTranslations();
         const avatarDisplay = document.getElementById('avatar_display');
 
         const fields = ['firstname', 'lastname', 'phone', 'email', 'avatar'];
@@ -207,6 +181,12 @@
 
         // Load profile initially
         await loadProfile();
+        
+        document.getElementById('langSwitcher').value = lang;
+        document.getElementById('langSwitcher').addEventListener('change', async (e) => {
+            await setLocale(e.target.value);
+            await loadTranslations();
+        });
 
         editBtn.addEventListener('click', () => {
             toggleEditMode(true);
@@ -271,6 +251,71 @@
             }
         });
     });
+    pform.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(pform);
+        formData.append('_method', 'PUT'); // Spoofing PUT request
+
+        async function changePassword() {
+            try {
+                const response = await fetch(`/api/profile/${userId}/updatePassword`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to change password');
+                const json = await response.json();
+                console.log(json);
+
+                alert('Password changed successfully!');
+                pform.reset(); // Optional: reset the form
+
+            } catch (error) {
+                console.error(error);
+                alert('Failed to change password.');
+            }
+        }
+
+        await changePassword(); // <-- You were missing this
+    });
+    async function loadTranslations() {
+        const res = await fetch('/api/profiletranslation');
+        t = await res.json();
+        document.getElementById('profile-title').textContent = t.user_profile;
+        document.getElementById('label-firstname').textContent = t.first_name;
+        document.getElementById('label-lastname').textContent = t.last_name;
+        document.getElementById('label-phone').textContent = t.phone;
+        document.getElementById('label-email').textContent = t.email;
+        document.getElementById('label-profile-picture').textContent = t.profile_picture;
+        document.getElementById('editBtn').textContent= t.edit;
+        document.getElementById('saveBtn').textContent = t.save;
+        document.getElementById('cancelBtn').textContent = t.cancel;
+
+        document.getElementById('label-old-password').textContent = t.old_password;
+        document.getElementById('label-new-password').textContent = t.new_password;
+        document.getElementById('label-confirm-password').textContent = t.confirm_password;
+        cp.textContent = t.change_password;
+    }
+    async function setLocale(locale) {
+        try {
+            const response = await fetch('/api/locale', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ locale })
+            });
+            if (!response.ok) throw new Error('Failed to set locale');
+            await response.json();
+        } catch (error) {
+            console.error('Error setting locale:', error);
+        }
+    }
 </script>
 @endsection
 

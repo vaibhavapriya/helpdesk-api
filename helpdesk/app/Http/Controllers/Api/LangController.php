@@ -117,7 +117,24 @@ class LangController extends Controller
         ]);
     }
 
-
+    public function getProfileTranslations()
+    {
+        return response()->json([
+            'user_profile' => __('profile.title'),
+            'first_name' => __('profile.first_name'),
+            'last_name' => __('profile.last_name'),
+            'phone' => __('profile.phone'),
+            'email' => __('profile.email'),
+            'profile_picture' => __('profile.profile_picture'),
+            'edit' => __('profile.edit'),
+            'save' => __('profile.save'),
+            'cancel' => __('profile.cancel'),
+            'old_password' => __('profile.old_password'),
+            'new_password' => __('profile.new_password'),
+            'confirm_password' => __('profile.confirm_password'),
+            'change_password' => __('profile.change_password'),
+        ]);
+    }
 
     public function getFaqByLanguage($lang)
     {
