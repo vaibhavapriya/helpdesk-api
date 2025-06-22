@@ -76,6 +76,26 @@ class LangController extends Controller
             'next' => __('tickets.next'),
         ]);
     }
+    public function getEditTranslations()
+    {
+        return response()->json([
+            'page_title' => __('tickets.edit_title'),
+            'title' => __('tickets.title'),
+            'description' => __('tickets.description'),
+            'priority' => __('tickets.priority'),
+            'department' => __('tickets.department'),
+            'status' => __('tickets.status'),
+            'attachment' => __('tickets.attachment'),
+            'change_attachment' => __('tickets.change_attachment'),
+            'update' => __('tickets.update'),
+            'low' => __('tickets.low'),
+            'medium' => __('tickets.medium'),
+            'high' => __('tickets.high'),
+            'open' => __('tickets.open'),
+            'closed' => __('tickets.closed'),
+        ]);
+    }
+
 
     public function getFaqByLanguage($lang)
     {

@@ -1,7 +1,8 @@
 @extends('components.layouts.app.client')
+
 @section('content')
 <div class="container">
-    <h1>Edit Ticket</h1>
+    <h1 id="page-title">...</h1>
 
     <div id="error-messages" class="alert alert-danger d-none">
         <ul id="error-list"></ul>
@@ -9,72 +10,109 @@
 
     <form id="edit-ticket-form" enctype="multipart/form-data">
         <div class="mb-3">
-            <label for="title" class="form-label">Title</label>
+            <label for="title" class="form-label" id="label-title">Title</label>
             <input type="text" class="form-control" id="title" name="title" required>
             <div class="invalid-feedback" id="title_error"></div>
         </div>
 
         <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
+            <label for="description" class="form-label" id="label-description">Description</label>
             <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
             <div class="invalid-feedback" id="description_error"></div>
         </div>
 
         <div class="mb-3">
-            <label for="priority" class="form-label">Priority</label>
+            <label for="priority" class="form-label" id="label-priority">Priority</label>
             <select class="form-select" id="priority" name="priority" required>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="low" id="opt-low">Low</option>
+                <option value="medium" id="opt-medium">Medium</option>
+                <option value="high" id="opt-high">High</option>
             </select>
             <div class="invalid-feedback" id="priority_error"></div>
         </div>
 
         <div class="mb-3">
-            <label for="department" class="form-label">Department</label>
+            <label for="department" class="form-label" id="label-department">Department</label>
             <input type="text" class="form-control" id="department" name="department" required>
             <div class="invalid-feedback" id="department_error"></div>
         </div>
 
-        <!-- New Status Field -->
         <div class="mb-3">
-            <label for="status" class="form-label">Status</label>
+            <label for="status" class="form-label" id="label-status">Status</label>
             <select class="form-select" id="status" name="status" required>
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
+                <option value="open" id="opt-open">Open</option>
+                <option value="closed" id="opt-closed">Closed</option>
             </select>
             <div class="invalid-feedback" id="status_error"></div>
         </div>
 
         <div class="mb-3">
-            <label>Current Attachment</label><br>
+            <label id="label-attachment">Current Attachment</label><br>
             <img id="current-attachment" src="" alt="Ticket Attachment" style="max-width: 300px;">
         </div>
 
         <div class="mb-3 form-group">
-            <label for="attachment" class="form-label">Change Attachment</label>
+            <label for="attachment" class="form-label" id="label-change-attachment">Change Attachment</label>
             <input class="form-control" type="file" id="attachment" name="attachment" accept="image/*">
             <div class="invalid-feedback" id="attachment_error"></div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Update Ticket</button>
+        <button type="submit" class="btn btn-primary" id="btn-update">Update Ticket</button>
     </form>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+    const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const lang = localStorage.getItem('lang') || 'en';
+    let editTranslations = {};
+    const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
+    const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
+
     const form = document.getElementById('edit-ticket-form');
     const errorMessages = document.getElementById('error-messages');
     const errorList = document.getElementById('error-list');
     const currentAttachment = document.getElementById('current-attachment');
 
-    const token = 'Bearer ' + localStorage.getItem('auth_token');
-    if (!token) {
-        // Not logged in, redirect to login
-        window.location.href = "{{ route('login') }}";
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!localStorage.getItem('auth_token')) {
+            window.location.href = "{{ route('login') }}";
+            return;
+        }
+
+        await loadEditTranslations();
+        await fetchTicket();
+
+        document.getElementById('langSwitcher').value = lang;
+        document.getElementById('langSwitcher').addEventListener('change', async (e) => {
+            await setLocale(e.target.value);
+            await loadEditTranslations();
+        });
+    });
+
+    async function loadEditTranslations() {
+        try {
+            const res = await fetch('/api/editticket');
+            editTranslations = await res.json();
+
+            document.getElementById('page-title').textContent = editTranslations.page_title;
+            document.getElementById('label-title').textContent = editTranslations.title;
+            document.getElementById('label-description').textContent = editTranslations.description;
+            document.getElementById('label-priority').textContent = editTranslations.priority;
+            document.getElementById('label-department').textContent = editTranslations.department;
+            document.getElementById('label-status').textContent = editTranslations.status;
+            document.getElementById('label-attachment').textContent = editTranslations.attachment;
+            document.getElementById('label-change-attachment').textContent = editTranslations.change_attachment;
+            document.getElementById('btn-update').textContent = editTranslations.update;
+
+            document.getElementById('opt-low').textContent = editTranslations.low;
+            document.getElementById('opt-medium').textContent = editTranslations.medium;
+            document.getElementById('opt-high').textContent = editTranslations.high;
+            document.getElementById('opt-open').textContent = editTranslations.open;
+            document.getElementById('opt-closed').textContent = editTranslations.closed;
+        } catch (err) {
+            console.error('Failed to load edit translations', err);
+        }
     }
-    const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
-    const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
 
     async function fetchTicket() {
         try {
@@ -107,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    fetchTicket();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -167,6 +204,23 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
         }
     });
-});
+
+    async function setLocale(locale) {
+        try {
+            const response = await fetch('/api/locale', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ locale })
+            });
+            if (!response.ok) throw new Error('Failed to set locale');
+            await response.json();
+        } catch (error) {
+            console.error('Error setting locale:', error);
+        }
+    }
 </script>
 @endsection
+

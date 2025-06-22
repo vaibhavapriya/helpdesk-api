@@ -26,4 +26,10 @@ return [
     'delete' => 'Delete',
     'previous' => 'Previous',
     'next' => 'Next',
+
+    'edit_title' => 'Edit Ticket',
+    'change_attachment' => 'Change Attachment',
+    'update' => 'Update Ticket',
+    'open' => 'Open',
+    'closed' => 'Closed',
 ];

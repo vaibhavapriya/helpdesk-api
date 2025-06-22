@@ -26,4 +26,10 @@ return [
     'delete' => 'Eliminar',
     'previous' => 'Anterior',
     'next' => 'Siguiente',
+
+    'edit_title' => 'Editar Ticket',
+    'change_attachment' => 'Cambiar Archivo Adjunto',
+    'update' => 'Actualizar Ticket',
+    'open' => 'Abierto',
+    'closed' => 'Cerrado',
 ];
