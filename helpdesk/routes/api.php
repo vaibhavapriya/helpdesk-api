@@ -69,6 +69,7 @@ Route::group(['middleware'=>['web','lang']],function () {
     Route::get('/faq', [LangController::class, 'getFaq']);
     Route::post('/locale', [LangController::class, 'setLocale']);
     Route::get('/newticket', [LangController::class, 'getNewticket']);
+    Route::get('/tickets', [LangController::class, 'getTickets']);
 });
 
 

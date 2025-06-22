@@ -17,4 +17,13 @@ return [
     'title_placeholder' => 'Título',
     'department_placeholder' => 'Departamento',
     'description_placeholder' => 'Descripción',
+
+    'status' => 'Estado',
+    'actions' => 'Acciones',
+    'list_title' => 'Lista de Tickets',
+    'no_tickets' => 'No se encontraron tickets.',
+    'edit' => 'Editar',
+    'delete' => 'Eliminar',
+    'previous' => 'Anterior',
+    'next' => 'Siguiente',
 ];

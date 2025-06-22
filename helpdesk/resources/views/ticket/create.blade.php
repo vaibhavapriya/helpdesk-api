@@ -78,7 +78,8 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const token = 'Bearer ' + localStorage.getItem('auth_token');
     const storedEmail = localStorage.getItem('user_email');
-
+    const lang = localStorage.getItem('lang') || 'en';
+    document.getElementById('langSwitcher').value = lang;
     if (storedEmail) document.getElementById('email').value = storedEmail;
 
     const form = document.getElementById('ticket-form');

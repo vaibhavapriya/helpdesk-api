@@ -2,12 +2,12 @@
 @section('content')
 <main class="d-flex align-items-center justify-content-center">
     <div class="container">
-      <div class="d-flex justify-content-end mb-3">
+      <!-- <div class="d-flex justify-content-end mb-3">
         <select id="langSelector" class="form-select w-auto">
           <option value="en" selected>English</option>
           <option value="es">Español</option>
         </select>
-      </div>
+      </div> -->
 
       <h2 class="mb-4 mt-4 text-center" id="pageTitle">Service Desk Knowledge Base</h2>
 
@@ -83,13 +83,15 @@
     }
   }
 
-  document.getElementById('langSelector').addEventListener('change', async (e) => {
+  document.getElementById('langSwitcher').addEventListener('change', async (e) => {
     const locale = e.target.value;
     await setLocale(locale);
     await loadFaq();
   });
 
   document.addEventListener('DOMContentLoaded', () => {
+    const lang = localStorage.getItem('lang') || 'en';
+    document.getElementById('langSwitcher').value = lang;
     loadFaq();
   });
 </script>

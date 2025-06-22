@@ -31,7 +31,12 @@
         <li class="nav-item" id="nav-my-ticket" style="display:none;">
           <a class="nav-link" href="{{ url('tickets') }}">MY TICKET</a>
         </li>
-
+        <li>
+          <select id="langSwitcher" class="form-select w-auto">
+            <option value="en" selected>English</option>
+            <option value="es">Español</option>
+          </select>
+        </li>
         <li class="nav-item dropdown" id="nav-user-dropdown" style="display:none;">
           <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
             aria-expanded="false">
@@ -121,5 +126,26 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Logout error, see console');
     }
   });
+      // Optional: Language switcher
+  document.getElementById('langSwitcher')?.addEventListener('change', async (e) => {
+        const selectedLocale = e.target.value;
+        await fetch('/api/locale', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ locale: selectedLocale })
+        });
+        if (response.ok) {
+            // Refresh the page after successful locale update
+            window.location.reload();
+        } else {
+            console.error('Locale update failed:', await response.text());
+        }
+        
+    });
+  
 });
 </script>

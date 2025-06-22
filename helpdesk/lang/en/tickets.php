@@ -1,5 +1,4 @@
 <?php
-
 return [
     'new_ticket' => 'New Ticket',
     'info_text' => 'Please provide the following information about your query.',
@@ -18,4 +17,13 @@ return [
     'title_placeholder' => 'Title',
     'department_placeholder' => 'Department',
     'description_placeholder' => 'Description',
+
+    'status' => 'Status',
+    'actions' => 'Actions',
+    'list_title' => 'Ticket List',
+    'no_tickets' => 'No tickets found.',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'previous' => 'Previous',
+    'next' => 'Next',
 ];
