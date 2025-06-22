@@ -95,6 +95,28 @@ class LangController extends Controller
             'closed' => __('tickets.closed'),
         ]);
     }
+    public function getViewTranslations()
+    {
+        return response()->json([
+            'attachment' => __('tickets.attachment'),
+            'no_attachment' => __('tickets.no_attachment'),
+            'replies' => __('tickets.replies'),
+            'reply_placeholder' => __('tickets.reply_placeholder'),
+            'submit' => __('tickets.submit'),
+            'back' => __('tickets.back'),
+            'description' => __('tickets.description'),
+            'status' => __('tickets.status'),
+            'priority' => __('tickets.priority'),
+            'requester' => __('tickets.requester'),
+            'open' => __('tickets.open'),
+            'closed' => __('tickets.closed'),
+            'pending' => __('tickets.pending'),
+            'low' => __('tickets.low'),
+            'medium' => __('tickets.medium'),
+            'high' => __('tickets.high'),
+        ]);
+    }
+
 
 
     public function getFaqByLanguage($lang)

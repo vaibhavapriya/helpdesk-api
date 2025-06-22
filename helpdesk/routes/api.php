@@ -71,6 +71,8 @@ Route::group(['middleware'=>['web','lang']],function () {
     Route::get('/newticket', [LangController::class, 'getNewticket']);
     Route::get('/tickets', [LangController::class, 'getTickets']);
     Route::get('/editticket', [LangController::class, 'getEditTranslations']);
+    Route::get('/showticket', [LangController::class, 'getViewTranslations']);
+
 });
 
 

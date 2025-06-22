@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
             // Refresh the page after successful locale update
             window.location.reload();
+            localStorage.setItem('lang',selectedLocale);
         } else {
             console.error('Locale update failed:', await response.text());
         }

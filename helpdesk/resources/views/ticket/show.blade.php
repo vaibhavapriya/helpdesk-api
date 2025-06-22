@@ -7,44 +7,70 @@
 
     <!-- Attachment -->
     <div class="mb-4 mt-20">
-        <h3>Attachment:</h3>
+        <h3 id="attachment-title">Attachment:</h3>
         <div id="attachmentContainer"></div>
     </div>
 
-    <h3 class="text-success mt-5">Replies</h3>
+    <h3 class="text-success mt-5" id="replies-title">Replies</h3>
     <ul id="replies-list" class="list-unstyled"></ul>
 
     <form id="reply-form" class="mt-4">
         <div class="d-flex">
-            <input type="text" class="form-control me-2" id="reply-input" placeholder="Reply here..." required>
-            <button class="btn btn-primary" type="submit">Submit</button>
+            <input type="text" class="form-control me-2" id="reply-input" required>
+            <button class="btn btn-primary" type="submit" id="submit-btn">Submit</button>
         </div>
     </form>
 
-    <a href="/tickets" class="btn btn-secondary mt-4">Back to List</a>
+    <a href="/tickets" class="btn btn-secondary mt-4" id="back-btn">Back to List</a>
 </div>
-@endsection
+
 
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
     const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
     const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
     const token = 'Bearer ' + localStorage.getItem('auth_token');
+    const lang = localStorage.getItem('lang') || 'en';
+    let translations = {};
 
     const ticketContainer = document.getElementById("ticket-details");
     const repliesList = document.getElementById("replies-list");
     const replyForm = document.getElementById("reply-form");
     const replyInput = document.getElementById("reply-input");
+document.addEventListener("DOMContentLoaded", async () => {
 
-    if (!localStorage.getItem('auth_token')) {
+    if (!token) {
         alert('You are not logged in. Redirecting to login.');
         window.location.href = "{{ route('login') }}";
         return;
     }
 
-    // Fetch Ticket Details
-    const fetchTicket = async () => {
+    await loadViewTranslations();
+    fetchTicket();
+
+    document.getElementById('langSwitcher').value = lang;
+    document.getElementById('langSwitcher').addEventListener('change', async (e) => {
+            await setLocale(e.target.value);
+            await loadViewTranslations();
+            fetchTicket();
+    });
+
+});
+    async function loadViewTranslations() {
+        try {
+            const res = await fetch('/api/showticket');
+            translations = await res.json();
+
+            document.getElementById('attachment-title').textContent = translations.attachment;
+            document.getElementById('replies-title').textContent = translations.replies;
+            document.getElementById('reply-input').placeholder = translations.reply_placeholder;
+            document.getElementById('submit-btn').textContent = translations.submit;
+            document.getElementById('back-btn').textContent = translations.back;
+        } catch (err) {
+            console.error("Failed to load translations", err);
+        }
+    }
+        const fetchTicket = async () => {
         try {
             const res = await fetch(apiBase, {
                 headers: {
@@ -65,34 +91,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Render Ticket Info and Attachment
     function renderTicket(ticket) {
         ticketContainer.innerHTML = `
         <h1 class="display-4 mb-4">${ticket.title}</h1>
         <table class="table table-bordered table-striped fs-5">
             <tbody>
             <tr>
-                <th scope="row" class="w-25">Description</th>
+                <th scope="row" class="w-25">${translations.description}</th>
                 <td>${ticket.description}</td>
             </tr>
             <tr>
-                <th scope="row">Status</th>
+                <th scope="row">${translations.status}</th>
                 <td>
                 <span class="badge bg-${getStatusBadgeClass(ticket.status)} fs-6">
-                    ${capitalize(ticket.status)}
+                    ${translations[ticket.status?.toLowerCase()] || capitalize(ticket.status)}
                 </span>
                 </td>
             </tr>
             <tr>
-                <th scope="row">Priority</th>
+                <th scope="row">${translations.priority}</th>
                 <td>
                 <span class="badge bg-${getPriorityBadgeClass(ticket.priority)} fs-6">
-                    ${capitalize(ticket.priority)}
+                    ${translations[ticket.priority?.toLowerCase()] || capitalize(ticket.priority)}
                 </span>
                 </td>
             </tr>
             <tr>
-                <th scope="row">Requester</th>
+                <th scope="row">${translations.requester}</th>
                 <td>${ticket.requester?.name || 'Anonymous'}</td>
             </tr>
             </tbody>
@@ -101,14 +126,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const attachmentContainer = document.getElementById('attachmentContainer');
         if (!ticket.image) {
-            attachmentContainer.textContent = "No attachment available.";
+            attachmentContainer.textContent = translations.no_attachment;
         } else {
             attachmentContainer.innerHTML = `<img src="http://127.0.0.1:8000/storage/${ticket.image.link}" 
                 alt="Ticket Attachment" style="max-width: 600px; height: auto;">`;
         }
     }
 
-    // Helper functions to get Bootstrap badge colors for status/priority
     function getStatusBadgeClass(status) {
         switch(status?.toLowerCase()) {
             case 'open': return 'success';
@@ -127,12 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Capitalize first letter utility
     function capitalize(str) {
         return str?.trim() ? str.trim()[0].toUpperCase() + str.trim().slice(1) : '';
     }
 
-    // Render Replies
     function renderReplies(replies, parent = repliesList) {
         parent.innerHTML = '';
         replies.forEach(reply => {
@@ -160,7 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Submit Reply
     replyForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -181,13 +202,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             replyInput.value = '';
-            fetchTicket(); // refresh replies
+            fetchTicket(); // refresh
         } catch (err) {
             console.error("Reply error:", err);
             alert(err.message);
         }
     });
-
-    fetchTicket();
-});
+    async function setLocale(locale) {
+        try {
+            const response = await fetch('/api/locale', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ locale })
+            });
+            if (!response.ok) throw new Error('Failed to set locale');
+            await response.json();
+        } catch (error) {
+            console.error('Error setting locale:', error);
+        }
+    }
 </script>
+@endsection
+

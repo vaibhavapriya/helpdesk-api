@@ -12,7 +12,7 @@ return [
     'description' => 'Descripción',
     'attachment' => 'Adjunto',
     'terms' => 'Términos y Condiciones',
-    'submit' => 'Crear',
+    'submit' => 'Enviar',
     'email_placeholder' => 'Correo electrónico',
     'title_placeholder' => 'Título',
     'department_placeholder' => 'Departamento',
@@ -32,4 +32,12 @@ return [
     'update' => 'Actualizar Ticket',
     'open' => 'Abierto',
     'closed' => 'Cerrado',
+
+    'no_attachment' => 'No hay archivo adjunto disponible.',
+    'replies' => 'Respuestas',
+    'reply_placeholder' => 'Escribe una respuesta...',
+    'back' => 'Volver a la lista',
+    'requester' => 'Solicitante',
+    'pending' => 'Pendiente',
+
 ];

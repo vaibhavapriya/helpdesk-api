@@ -88,7 +88,7 @@
         tableBody.innerHTML = tickets.length ? tickets.map(t => `
             <tr data-id="${t.id}">
                 <td>${t.id}</td>
-                <td>${t.title}</td>
+                <td><a href="/tickets/${t.id}">${t.title}</a></td>
                 <td>${capitalize(t.priority)}</td>
                 <td>${capitalize(t.status)}</td>
                 <td>${t.department}</td>

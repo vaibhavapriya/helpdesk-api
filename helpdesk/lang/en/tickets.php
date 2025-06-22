@@ -12,7 +12,7 @@ return [
     'description' => 'Description',
     'attachment' => 'Attachment',
     'terms' => 'Terms & Conditions',
-    'submit' => 'Create',
+    'submit' => 'Submit',
     'email_placeholder' => 'Email',
     'title_placeholder' => 'Title',
     'department_placeholder' => 'Department',
@@ -32,4 +32,13 @@ return [
     'update' => 'Update Ticket',
     'open' => 'Open',
     'closed' => 'Closed',
+
+    'no_attachment' => 'No attachment available.',
+    'replies' => 'Replies',
+    'reply_placeholder' => 'Reply here...',
+    'back' => 'Back to List',
+    'requester' => 'Requester',
+    'pending' => 'Pending',
+
+
 ];
