@@ -33,8 +33,8 @@
         </li>
         <li>
           <select id="langSwitcher" class="form-select w-auto">
-            <option value="en" selected>English</option>
-            <option value="es">Español</option>
+            <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>English</option>
+            <option value="es" {{ app()->getLocale() === 'es' ? 'selected' : '' }}>Español</option>
           </select>
         </li>
         <li class="nav-item dropdown" id="nav-user-dropdown" style="display:none;">
