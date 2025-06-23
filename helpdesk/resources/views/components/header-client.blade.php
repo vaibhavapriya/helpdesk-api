@@ -67,7 +67,7 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async() => {
   const token = localStorage.getItem('auth_token');
   const role = localStorage.getItem('user_role'); // expected 'admin' or other
 
@@ -95,7 +95,28 @@ document.addEventListener('DOMContentLoaded', () => {
     navMyTicket.style.display = 'none';
     navUserDropdown.style.display = 'none';
   }
+  async function loadHeaderTranslations() {
+    try {
+        const response = await fetch('/api/header', {
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Failed to load header translations');
 
+        const data = await response.json();
+
+        document.querySelector('a[href="/tickets/create"]').textContent = data.submit_ticket;
+        document.querySelector('a[href="/kb"]').textContent = data.knowledgebase;
+        document.querySelector('#nav-login a').textContent = data.login;
+        document.querySelector('#nav-my-ticket a').textContent = data.my_ticket;
+        document.querySelector('#nav-user-dropdown .dropdown-menu a[href="/myProfile"]').textContent = data.my_profile;
+        document.querySelector('#logout-form button[type="submit"]').textContent = data.logout;
+        document.querySelector('#admin-portal a').textContent = data.admin_portal;
+
+    } catch (error) {
+        console.error(error);
+    }
+  }
+  await loadHeaderTranslations() ;
   logoutForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -129,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Optional: Language switcher
   document.getElementById('langSwitcher')?.addEventListener('change', async (e) => {
         const selectedLocale = e.target.value;
-        await fetch('/api/locale', {
+        const response = await fetch('/api/locale', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -140,13 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (response.ok) {
             // Refresh the page after successful locale update
-            window.location.reload();
+            // window.location.reload();
             localStorage.setItem('lang',selectedLocale);
+            await loadHeaderTranslations();
         } else {
             console.error('Locale update failed:', await response.text());
         }
         
-    });
+  });
   
 });
 </script>
