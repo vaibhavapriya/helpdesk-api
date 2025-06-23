@@ -31,7 +31,7 @@
                     <th>Role</th>
                     <th>Email</th>
                     <th>Phone No</th>
-                    <th>Delete</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="userTableBody">
@@ -128,7 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="clickable-role">${user.user.role}</td>
                         <td>${user.email}</td>
                         <td>${user.phone}</td>
-                        <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${user.user_id})">Delete</button></td>
+                        <td>
+                            <a href="/admin/profile/${user.user_id}" class="btn btn-warning btn-sm">Edit</a>
+                            <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.user_id})"><i class="fa-solid fa-trash">  </i>Delete</button>
+                        </td>
                     `;
 
                     tableBody.appendChild(row);
