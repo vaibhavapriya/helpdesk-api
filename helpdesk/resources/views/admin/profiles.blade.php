@@ -47,6 +47,14 @@
     </nav>
 @endsection
 <script>
+    function getStatusBadge(role) {
+    switch (role.toLowerCase()) {
+        case 'client': return 'primary';
+        case 'agent': return 'warning';
+        case 'admin': return 'success';
+        default: return 'dark'; // fallback for unknown roles
+    }
+}
 document.addEventListener('DOMContentLoaded', () => {
     if (!localStorage.getItem('auth_token')) {
         alert('You are not logged in. Redirecting to login.');
@@ -123,10 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     row.setAttribute('data-id', user.user_id);
                     // Fill in user data here:
                     row.innerHTML = `
-                        <td class="clickable-id">${user.user_id}</td>
-                        <td class="clickable-name">${user.firstname} ${user.lastname}</td>
-                        <td class="clickable-role">${user.user.role}</td>
-                        <td>${user.email}</td>
+                        <td class="clickable-id"  style="cursor:pointer; color:blue;">${user.user_id}</td>
+                        <td>${user.firstname} ${user.lastname}</td>
+                        <td><span class="badge bg-${getStatusBadge(user.user.role)} clickable-role" style="cursor:pointer;">${user.user.role}</span></td>
+                        <td class="clickable-name"  style="cursor:pointer; color:blue;">${user.email}</td>
                         <td>${user.phone}</td>
                         <td>
                             <a href="/admin/profile/${user.user_id}" class="btn btn-warning btn-sm">Edit</a>
