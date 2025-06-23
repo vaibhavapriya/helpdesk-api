@@ -120,18 +120,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 users.forEach(user => {
                     const row = document.createElement('tr');
                     row.style.cursor = 'pointer';
-
+                    row.setAttribute('data-id', user.user_id);
                     // Fill in user data here:
                     row.innerHTML = `
-                        <td>${user.user_id}</td>
-                        <td>${user.firstname} ${user.lastname}</td>
-                        <td>${user.user.role}</td>
+                        <td class="clickable-id">${user.user_id}</td>
+                        <td class="clickable-name">${user.firstname} ${user.lastname}</td>
+                        <td class="clickable-role">${user.user.role}</td>
                         <td>${user.email}</td>
                         <td>${user.phone}</td>
                         <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${user.user_id})">Delete</button></td>
                     `;
 
                     tableBody.appendChild(row);
+                    
+                    tableBody.querySelectorAll('.clickable-id, .clickable-name').forEach(cell => {
+                        cell.addEventListener('click', (e) => {
+                            const row = e.target.closest('tr');
+                            const id = row.dataset.id;
+                            window.location.href = `/admin/profile/${id}`;
+                        });
+                    });
+                    const roleCell = row.querySelector('.clickable-role');
+                    if (roleCell) {
+                        roleCell.addEventListener('click', () => {
+                            const selectedRole = roleCell.textContent.trim();
+                            currentRole = selectedRole;
+                            document.getElementById('roleFilter').value = selectedRole;
+                            fetchUsers();
+                        });
+                    }
                 });
 
                 renderPagination(result.meta);
