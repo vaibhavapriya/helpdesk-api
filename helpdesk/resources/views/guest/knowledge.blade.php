@@ -103,8 +103,8 @@
   //   }
   // }
   document.getElementById('langSwitcher').addEventListener('change', async (e) => {
-    const locale = e.target.value;
-    localStorage.setItem('lang',locale);
+    // const locale = e.target.value;
+    // localStorage.setItem('lang',locale);
     // await setLocale(locale);
     await loadFaq();
     //loadHeaderTranslations();

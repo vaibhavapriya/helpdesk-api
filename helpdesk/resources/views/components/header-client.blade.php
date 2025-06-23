@@ -100,27 +100,6 @@ document.addEventListener('DOMContentLoaded', async() => {
     navMyTicket.style.display = 'none';
     navUserDropdown.style.display = 'none';
   }
-  async function loadHeaderTranslations() {
-    try {
-        const response = await fetch('/api/header', {
-            headers: { 'Accept': 'application/json' }
-        });
-        if (!response.ok) throw new Error('Failed to load header translations');
-
-        const data = await response.json();
-
-        document.getElementById('link-submit-ticket').textContent = data.submit_ticket;
-        document.getElementById('link-knowledgebase').textContent = data.knowledgebase;
-        document.querySelector('#nav-login a').textContent = data.login;
-        document.querySelector('#nav-my-ticket a').textContent = data.my_ticket;
-        document.getElementById('link-my-profile').textContent = data.my_profile;
-        document.querySelector('#logout-form button[type="submit"]').textContent = data.logout;
-        document.querySelector('#admin-portal a').textContent = data.admin_portal;
-
-    } catch (error) {
-        console.error(error);
-    }
-  }
   await loadHeaderTranslations() ;
   logoutForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -153,6 +132,30 @@ document.addEventListener('DOMContentLoaded', async() => {
     }
   });
       // Optional: Language switcher
+
+  
+});
+  async function loadHeaderTranslations() {
+    try {
+        const response = await fetch('/api/header', {
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Failed to load header translations');
+
+        const data = await response.json();
+
+        document.getElementById('link-submit-ticket').textContent = data.submit_ticket;
+        document.getElementById('link-knowledgebase').textContent = data.knowledgebase;
+        document.querySelector('#nav-login a').textContent = data.login;
+        document.querySelector('#nav-my-ticket a').textContent = data.my_ticket;
+        document.getElementById('link-my-profile').textContent = data.my_profile;
+        document.querySelector('#logout-form button[type="submit"]').textContent = data.logout;
+        document.querySelector('#admin-portal a').textContent = data.admin_portal;
+
+    } catch (error) {
+        console.error(error);
+    }
+  }
   document.getElementById('langSwitcher')?.addEventListener('change', async (e) => {
         const selectedLocale = e.target.value;
         const response = await fetch('/api/locale', {
@@ -174,6 +177,4 @@ document.addEventListener('DOMContentLoaded', async() => {
         }
         
   });
-  
-});
 </script>
