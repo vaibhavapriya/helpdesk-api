@@ -172,7 +172,8 @@ document.addEventListener('DOMContentLoaded', async() => {
             // Refresh the page after successful locale update
             // window.location.reload();
             localStorage.setItem('lang',selectedLocale);
-            await loadHeaderTranslations();
+            // await loadHeaderTranslations();
+            window.location.reload();
         } else {
             console.error('Locale update failed:', await response.text());
         }
