@@ -7,7 +7,22 @@
 </section>
 
 <script>
-  // JS component to generate the card HTML
+  // Check if user is authenticated by checking token in localStorage
+  const token = localStorage.getItem('auth_token'); // Adjust key if needed
+  const isAuthenticated = !!token;
+  translations={};
+  document.addEventListener('DOMContentLoaded', async() => {
+    const lang = localStorage.getItem('lang') || 'en';
+    document.getElementById('langSwitcher').value = lang;
+    await loadGrid();
+  });
+  document.getElementById('langSwitcher').addEventListener('change', async (e) => {
+    const locale = e.target.value;
+    localStorage.setItem('lang',locale);
+    await loadGrid();
+  });
+
+    // JS component to generate the card HTML
   function HomeCard({ url, icon, title, colClass }) {
     return `
       <div class="${colClass}">
@@ -21,48 +36,57 @@
     `;
   }
 
-  // Check if user is authenticated by checking token in localStorage
-  const token = localStorage.getItem('auth_token'); // Adjust key if needed
-  const isAuthenticated = !!token;
-
-  // Cards to render
-  const cards = [];
-
-  if (!isAuthenticated) {
-    cards.push({
-      url: "{{ route('register') }}",
-      icon: 'fa-regular fa-pen-to-square',
-      title: 'Register',
-      colClass: 'col-md-3'
-    });
-  }
-
-  const colClass = isAuthenticated ? 'col-md-4' : 'col-md-3';
-
-  cards.push(
-    {
-      url: "{{ route('ticket') }}",
-      icon: 'fa-solid fa-rectangle-list',
-      title: 'Submit Ticket',
-      colClass
-    },
-    {
-      url:"{{ route('tickets') }}",
-      icon: 'fa-regular fa-newspaper',
-      title: 'My Tickets',
-      colClass
-    },
-    {
-      url: "{{ route('kb') }}",
-      icon: 'fa-solid fa-lightbulb',
-      title: 'Knowledge Base',
-      colClass
+  async function loadGrid() {
+    const lang = localStorage.getItem('lang') || 'en';
+    
+    try {
+      const res = await fetch(`/api/homegrid?lang=${lang}`);
+      translations = await res.json();
+    } catch (e) {
+      console.error('Failed to load translations', e);
+      translations = {}; // fallback
     }
-  );
 
-  // Insert cards into container
-  const container = document.getElementById('home-cards-container');
-  container.innerHTML = cards.map(card => HomeCard(card)).join('');
+    const cards = [];
+
+    if (!isAuthenticated) {
+      cards.push({
+        url: "{{ route('register') }}",
+        icon: 'fa-regular fa-pen-to-square',
+        title: translations['register'] || 'Register',
+        colClass: 'col-md-3'
+      });
+    }
+
+    const colClass = isAuthenticated ? 'col-md-4' : 'col-md-3';
+
+    cards.push(
+      {
+        url: "{{ route('ticket') }}",
+        icon: 'fa-solid fa-rectangle-list',
+        title: translations['submit_ticket'] || 'Submit Ticket',
+        colClass
+      },
+      {
+        url: "{{ route('tickets') }}",
+        icon: 'fa-regular fa-newspaper',
+        title: translations['my_ticket'] || 'My Tickets',
+        colClass
+      },
+      {
+        url: "{{ route('kb') }}",
+        icon: 'fa-solid fa-lightbulb',
+        title: translations['knowledgebase'] || 'Knowledge Base',
+        colClass
+      }
+    );
+
+    const container = document.getElementById('home-cards-container');
+    container.innerHTML = cards.map(card => HomeCard(card)).join('');
+  }
+  
+
+
 </script>
 
 

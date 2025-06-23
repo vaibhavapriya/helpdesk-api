@@ -107,14 +107,14 @@
     localStorage.setItem('lang',locale);
     // await setLocale(locale);
     await loadFaq();
-    loadHeaderTranslations();
+    //loadHeaderTranslations();
   });
 
   document.addEventListener('DOMContentLoaded', () => {
     const lang = localStorage.getItem('lang') || 'en';
     document.getElementById('langSwitcher').value = lang;
     loadFaq();
-    loadHeaderTranslations();
+    //loadHeaderTranslations();
   });
 </script>
 @endsection

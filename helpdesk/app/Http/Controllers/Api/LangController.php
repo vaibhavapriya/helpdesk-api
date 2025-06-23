@@ -147,6 +147,15 @@ class LangController extends Controller
             'admin_portal' => __('nav.admin_portal'),
         ]);
     }
+    public function getHomegrid()
+    {
+        return response()->json([
+            'submit_ticket' => __('nav.submit_ticket'),
+            'knowledgebase' => __('nav.knowledgebase'),
+            'my_ticket' => __('nav.my_ticket'),
+            'register' => __('register'),
+        ]);
+    }
     public function getFaqByLanguage($lang)
     {
         app()->setLocale($lang); // Set locale dynamically
