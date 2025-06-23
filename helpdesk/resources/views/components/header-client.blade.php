@@ -33,8 +33,8 @@
         </li>
         <li>
           <select id="langSwitcher" class="form-select w-auto">
-            <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>English</option>
-            <option value="es" {{ app()->getLocale() === 'es' ? 'selected' : '' }}>Español</option>
+            <option value="en" >English</option>
+            <option value="es" >Español</option>
           </select>
         </li>
         <li class="nav-item dropdown" id="nav-user-dropdown" style="display:none;">
@@ -77,7 +77,12 @@ document.addEventListener('DOMContentLoaded', async() => {
   const navUserDropdown = document.getElementById('nav-user-dropdown');
   const adminPortal = document.getElementById('admin-portal');
   const logoutForm = document.getElementById('logout-form');
+    const storedLang = localStorage.getItem('lang') || 'en';
+    const langSelect = document.getElementById('langSwitcher');
 
+    if (langSelect) {
+        langSelect.value = storedLang;
+    }
   if (token) {
     // User is logged in
     navLogin.style.display = 'none';

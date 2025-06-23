@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.querySelector('#priority option[value="medium"]').textContent = t.medium;
         document.querySelector('#priority option[value="low"]').textContent = t.low;
     };
-    loadHeaderTranslations();
+    //loadHeaderTranslations();
     await loadLocaleContent();
 
     // Submit form
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         //     },
         //     body: JSON.stringify({ locale: selectedLocale })
         // });
-        loadHeaderTranslations();
+        //loadHeaderTranslations();
         await loadLocaleContent();
     });
 });

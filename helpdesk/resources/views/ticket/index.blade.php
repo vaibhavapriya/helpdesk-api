@@ -40,13 +40,12 @@
             window.location.href = "{{ route('login') }}";
             return;
         }
-        loadHeaderTranslations();
         await loadTranslations();
         fetchTickets();
         document.getElementById('langSwitcher').addEventListener('change', async (e) => {
             const locale = e.target.value;
             //await setLocale(locale);
-            loadHeaderTranslations();
+            //loadHeaderTranslations();
             await loadTranslations();
             fetchTickets(); // refetch tickets if translations affect them
         });

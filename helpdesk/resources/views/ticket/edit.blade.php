@@ -78,14 +78,14 @@
             window.location.href = "{{ route('login') }}";
             return;
         }
-        loadHeaderTranslations();
+        //loadHeaderTranslations();
         await loadEditTranslations();
         await fetchTicket();
 
         document.getElementById('langSwitcher').value = lang;
         document.getElementById('langSwitcher').addEventListener('change', async (e) => {
             //await setLocale(e.target.value);
-            loadHeaderTranslations();
+            //loadHeaderTranslations();
             await loadEditTranslations();
         });
     });
