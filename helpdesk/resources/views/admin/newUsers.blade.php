@@ -59,7 +59,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     };
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/admin/newUser', {
+        const response = await fetch('http://127.0.0.1:8000/api/admin/profiles/post', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 
         if (response.ok) {
             alert('Registration successful!');
-            window.location.href = "{{ route('login') }}";
+            window.location.href = "{{ route('profiles') }}";
         } else {
             if (result.errors) {
                 for (const field in result.errors) {

@@ -63,6 +63,7 @@
 
         </div>
     </form>
+    
 </div>
 
 <script>
@@ -208,6 +209,7 @@
 
                 toggleEditMode(false);
                 alert('Profile updated successfully!');
+                
             } catch (error) {
                 console.error(error);
                 alert('An unexpected error occurred.');

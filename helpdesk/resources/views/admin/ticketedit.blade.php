@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             alert('Ticket updated successfully!');
-            // Optionally redirect or reload page here
+            window.location.href = "{{ route('atickets') }}";
         } catch (error) {
             alert('Unexpected error occurred.');
             console.error(error);

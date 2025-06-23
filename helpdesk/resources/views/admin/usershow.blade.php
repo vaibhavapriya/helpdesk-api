@@ -62,6 +62,7 @@
 
         </div>
     </form>
+    <a href="{{ route('profiles') }}" class="btn btn-secondary mt-4">Back to List</a>
 </div>
 
 <script>
