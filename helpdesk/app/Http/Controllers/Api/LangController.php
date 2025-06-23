@@ -135,7 +135,18 @@ class LangController extends Controller
             'change_password' => __('profile.change_password'),
         ]);
     }
-
+    public function getHeader()
+    {
+        return response()->json([
+            'submit_ticket' => __('nav.submit_ticket'),
+            'knowledgebase' => __('nav.knowledgebase'),
+            'login' => __('nav.login'),
+            'my_ticket' => __('nav.my_ticket'),
+            'my_profile' => __('nav.my_profile'),
+            'logout' => __('nav.logout'),
+            'admin_portal' => __('nav.admin_portal'),
+        ]);
+    }
     public function getFaqByLanguage($lang)
     {
         app()->setLocale($lang); // Set locale dynamically

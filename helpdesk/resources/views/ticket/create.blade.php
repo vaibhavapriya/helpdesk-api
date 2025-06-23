@@ -4,10 +4,10 @@
 @include('components.grid-home-client')
 
     <div class="d-flex justify-content-end mb-3">
-        <select id="langSwitcher" class="form-select w-auto">
+        <!-- <select id="langSwitcher" class="form-select w-auto">
           <option value="en" selected>English</option>
           <option value="es">Español</option>
-        </select>
+        </select> -->
     </div>
 <div class="container mt-5 mb-5 d-flex justify-content-center">
 
