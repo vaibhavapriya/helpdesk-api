@@ -44,13 +44,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "{{ route('login') }}";
         return;
     }
-
+    loadHeaderTranslations();
     await loadViewTranslations();
     fetchTicket();
 
     document.getElementById('langSwitcher').value = lang;
     document.getElementById('langSwitcher').addEventListener('change', async (e) => {
-            await setLocale(e.target.value);
+            //await setLocale(e.target.value);
+            loadHeaderTranslations();
             await loadViewTranslations();
             fetchTicket();
     });

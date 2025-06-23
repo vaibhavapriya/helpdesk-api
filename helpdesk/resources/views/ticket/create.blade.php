@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.querySelector('#priority option[value="medium"]').textContent = t.medium;
         document.querySelector('#priority option[value="low"]').textContent = t.low;
     };
-
+    loadHeaderTranslations();
     await loadLocaleContent();
 
     // Submit form
@@ -162,16 +162,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Optional: Language switcher
     document.getElementById('langSwitcher')?.addEventListener('change', async (e) => {
-        const selectedLocale = e.target.value;
-        await fetch('/api/locale', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({ locale: selectedLocale })
-        });
+        // const selectedLocale = e.target.value;
+        // await fetch('/api/locale', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        //         'Accept': 'application/json',
+        //     },
+        //     body: JSON.stringify({ locale: selectedLocale })
+        // });
+        loadHeaderTranslations();
         await loadLocaleContent();
     });
 });
