@@ -32,7 +32,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Ticket::class,TicketPolicy::class);
         Gate::policy(Profile::class,ProfilePolicy::class);
         Gate::policy(User::class,UserPolicy::class);
-        
+        {
+            app()->setLocale(session('locale', config('app.locale')));
+        }
+                
     }
     
 }

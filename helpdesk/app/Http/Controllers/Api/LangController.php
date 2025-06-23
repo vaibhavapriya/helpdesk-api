@@ -22,14 +22,14 @@ class LangController extends Controller
     public function setLocale(Request $request)
     {
         $request->validate([
-            'locale' => 'required|string|in:en,es', // allow only supported locales
+            'locale' => 'required|string|in:en,es,ar', // allow only supported locales
         ]);
 
         $locale = $request->input('locale');
 
         // Save locale in session
         $request->session()->put('app_locale', $locale);
-
+        //session(['locale' => $locale]);
         // Also return success message
         return response()->json([
             'message' => 'Locale updated',

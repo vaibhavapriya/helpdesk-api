@@ -14,7 +14,6 @@ class SetLocale
         $locale = $request->session()->get('app_locale') 
                   ?? $request->cookie('app_locale') 
                   ?? config('app.locale');
-
         App::setLocale($locale);
 
         return $next($request);
