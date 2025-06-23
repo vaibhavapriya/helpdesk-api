@@ -16,10 +16,10 @@
       <ul class="navbar-nav" id="navbar-items">
         <!-- Always visible -->
         <li class="nav-item">
-          <a class="nav-link" href="{{ url('tickets/create') }}">SUBMIT TICKET</a>
+          <a class="nav-link" id="link-submit-ticket" href="{{ url('tickets/create') }}">SUBMIT TICKET</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('kb') }}">KNOWLEDGEBASE</a>
+          <a class="nav-link" id="link-knowledgebase" href="{{ route('kb') }}">KNOWLEDGEBASE</a>
         </li>
 
         <!-- Guest only -->
@@ -49,7 +49,7 @@
               </a>
             </li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item"  href="{{ url('/myProfile') }}"><i class="fas fa-user"></i> My Profile</a></li>
+            <li><a class="dropdown-item" id="link-my-profile"  href="{{ url('/myProfile') }}"><i class="fas fa-user"></i> My Profile</a></li>
             <li>
               <form id="logout-form" method="POST">
                 @csrf
@@ -104,11 +104,11 @@ document.addEventListener('DOMContentLoaded', async() => {
 
         const data = await response.json();
 
-        document.querySelector('a[href="/tickets/create"]').textContent = data.submit_ticket;
-        document.querySelector('a[href="/kb"]').textContent = data.knowledgebase;
+        document.getElementById('link-submit-ticket').textContent = data.submit_ticket;
+        document.getElementById('link-knowledgebase').textContent = data.knowledgebase;
         document.querySelector('#nav-login a').textContent = data.login;
         document.querySelector('#nav-my-ticket a').textContent = data.my_ticket;
-        document.querySelector('#nav-user-dropdown .dropdown-menu a[href="/myProfile"]').textContent = data.my_profile;
+        document.getElementById('link-my-profile').textContent = data.my_profile;
         document.querySelector('#logout-form button[type="submit"]').textContent = data.logout;
         document.querySelector('#admin-portal a').textContent = data.admin_portal;
 

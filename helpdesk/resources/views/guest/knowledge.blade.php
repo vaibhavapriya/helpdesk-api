@@ -65,34 +65,56 @@
       faqContainer.innerHTML = `<p class="text-danger">Error loading FAQs: ${error.message}</p>`;
     }
   }
+  // async function loadHeaderTranslations() {
+  //   try {
+  //       const response = await fetch('/api/header', {
+  //           headers: { 'Accept': 'application/json' }
+  //       });
+  //       if (!response.ok) throw new Error('Failed to load header translations');
 
-  async function setLocale(locale) {
-    try {
-      const response = await fetch('/api/locale', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ locale })
-      });
-      if(!response.ok) throw new Error('Failed to set locale');
-      await response.json();
-    } catch (error) {
-      console.error('Error setting locale:', error);
-    }
-  }
+  //       const data = await response.json();
 
+  //       document.querySelector('a[href="/tickets/create"]').textContent = data.submit_ticket;
+  //       document.querySelector('a[href="/kb"]').textContent = data.knowledgebase;
+  //       document.querySelector('#nav-login a').textContent = data.login;
+  //       document.querySelector('#nav-my-ticket a').textContent = data.my_ticket;
+  //       document.querySelector('#nav-user-dropdown .dropdown-menu a[href="/myProfile"]').textContent = data.my_profile;
+  //       document.querySelector('#logout-form button[type="submit"]').textContent = data.logout;
+  //       document.querySelector('#admin-portal a').textContent = data.admin_portal;
+
+  //   } catch (error) {
+  //       console.error(error);
+  //   }
+  // }
+  // async function setLocale(locale) {
+  //   try {
+  //     const response = await fetch('/api/locale', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'X-CSRF-TOKEN': '{{ csrf_token() }}'
+  //       },
+  //       body: JSON.stringify({ locale })
+  //     });
+  //     if(!response.ok) throw new Error('Failed to set locale');
+  //     await response.json();
+  //   } catch (error) {
+  //     console.error('Error setting locale:', error);
+  //   }
+  // }
   document.getElementById('langSwitcher').addEventListener('change', async (e) => {
     const locale = e.target.value;
-    await setLocale(locale);
+    localStorage.setItem('lang',locale);
+    // await setLocale(locale);
     await loadFaq();
+    loadHeaderTranslations();
   });
 
   document.addEventListener('DOMContentLoaded', () => {
     const lang = localStorage.getItem('lang') || 'en';
     document.getElementById('langSwitcher').value = lang;
     loadFaq();
+    loadHeaderTranslations();
   });
 </script>
 @endsection
