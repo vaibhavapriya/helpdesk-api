@@ -53,7 +53,8 @@ Route::group(['prefix'=>'admin'],function () {
     Route::view('/newuser','admin.newUsers')->name('newuser');
     Route::view('/errorlogs','admin.errorlog')->name('errorlog');
     Route::view('/mailconfig','admin.mailconfig')->name('mail');
-    Route::view('/config','admin.cacheQueue')->name('config');
+    Route::view('/cconfig','admin.cache')->name('cconfig');
+    Route::view('/qconfig','admin.queue')->name('qconfig');
     Route::get('/profile/{id}', function ($id) {
         return view('admin.usershow', compact('id'));
     })->name('profile.show');

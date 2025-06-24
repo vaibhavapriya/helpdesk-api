@@ -127,7 +127,7 @@
             </a>
           </li>
           <li class="nav-item menu-open">
-            <a href="{{ route('config') }}" class="nav-link active">
+            <a href="" class="nav-link active">
               <i class="fas fa-cogs nav-icon"></i>  <!-- config icon -->
               <p>
                 Configs
@@ -136,13 +136,13 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{{ route('config') }}" class="nav-link">
+                <a href="{{ route('qconfig') }}" class="nav-link">
                   <i class="fas fa-list-alt nav-icon"></i>  <!-- queue icon -->
                   <p>Queue</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{ route('config') }}" class="nav-link">
+                <a href="{{ route('cconfig') }}" class="nav-link">
                   <i class="fas fa-database nav-icon"></i>  <!-- cache icon -->
                   <p>Cache</p>
                 </a>
