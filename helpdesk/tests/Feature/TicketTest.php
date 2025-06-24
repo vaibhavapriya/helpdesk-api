@@ -77,7 +77,8 @@ class TicketTest extends TestCase
         $user = User::factory()->create(['role' => 'client']);
         Passport::actingAs($user);
 
-        $file = UploadedFile::fake()->image('doc.png');
+        $file = UploadedFile::fake()->image('doc1.png');
+        $expectedFilename = time() . '_doc1.png';
 
         $response = $this->postJson('/api/mytickets', [
             'title' => 'New Problem',
@@ -95,8 +96,8 @@ class TicketTest extends TestCase
             'requester_id' => $user->id,
         ]);
 
-        // Storage::disk('public')->assertExists('uploads/' . $file->hashName());
-         //Storage::disk('public')->assertExists('uploads/' . $filename);
+        // Assert file was saved
+        Storage::disk('public')->assertExists('uploads/' . $expectedFilename);
     }
 
     public function test_admin_can_store_ticket_for_any_user()
