@@ -17,10 +17,11 @@
               <table class="table table-bordered table-hover">
                 <thead>
                   <tr>
-                    <th>Active</th>
                     <th>Email</th>
                     <th>Name</th>
-                    <th>Actions</th>
+                    <th>Active</th>
+                    <th>Delete</th>
+                    
                   </tr>
                 </thead>
                 <tbody id="emailTableBody">
@@ -58,11 +59,15 @@
             const row = document.createElement('tr');
 
             row.innerHTML = `
-              <td>
-                <input type="radio" name="active_email" ${email.active ? 'checked' : ''} data-id="${email.id}" class="set-active-email">
-              </td>
+              
               <td>${email.mail_from_address}</td>
               <td>${email.mail_from_name}</td>
+              <td>
+                <div class="custom-control custom-switch">
+                  <input type="radio" class="custom-control-input set-active-email" id="activeEmail${email.id}" name="active_email" data-id="${email.id}" ${email.active ? 'checked' : ''}>
+                  <label class="custom-control-label" for="activeEmail${email.id}"></label>
+                </div>
+              </td>
               <td>
                 <button class="btn btn-danger btn-sm delete-email" data-id="${email.id}" >
                   <i class="fas fa-trash"></i> Delete

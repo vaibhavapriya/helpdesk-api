@@ -17,11 +17,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- beanstalkd -->
                     @foreach(['sync', 'database', 'redis', 'null'] as $driver)
                     <tr>
                         <td>
-                            <input type="radio" name="queue_driver" value="{{ $driver }}" onchange="handleDriverChange(this)">
+                            <div class="custom-control custom-switch">
+                                <input type="radio"
+                                    class="custom-control-input"
+                                    id="queue_{{ $driver }}"
+                                    name="queue_driver"
+                                    value="{{ $driver }}"
+                                    onchange="handleDriverChange(this)">
+                                <label class="custom-control-label" for="queue_{{ $driver }}"></label>
+                            </div>
                         </td>
                         <td>{{ ucfirst($driver) }}</td>
                         <td>{{ ucfirst($driver) }} queue driver</td>
@@ -43,11 +50,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- memcache -->
                     @foreach(['file', 'redis', 'array', 'database'] as $driver)
                     <tr>
                         <td>
-                            <input type="radio" name="cache_driver" value="{{ $driver }}" onchange="handleDriverChange(this)">
+                            <div class="custom-control custom-switch">
+                                <input type="radio"
+                                    class="custom-control-input"
+                                    id="cache_{{ $driver }}"
+                                    name="cache_driver"
+                                    value="{{ $driver }}"
+                                    onchange="handleDriverChange(this)">
+                                <label class="custom-control-label" for="cache_{{ $driver }}"></label>
+                            </div>
                         </td>
                         <td>{{ ucfirst($driver) }}</td>
                         <td>{{ ucfirst($driver) }} cache driver</td>
@@ -61,10 +75,12 @@
     <div id="statusMessage" class="alert alert-info d-none mt-3"></div>
 </div>
 
+<!-- Add Bootstrap CSS if not included -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
 <script>
     const token = 'Bearer ' + localStorage.getItem('auth_token');
 
-    // Helper to fetch with auth and JSON
     async function authFetch(url, options = {}) {
         return fetch(url, {
             ...options,
@@ -76,7 +92,6 @@
         });
     }
 
-    // Fetch current queue & cache drivers and mark them as selected
     document.addEventListener('DOMContentLoaded', async () => {
         try {
             const [queueRes, cacheRes] = await Promise.all([
@@ -88,11 +103,13 @@
             const cache = await cacheRes.json();
 
             if (queue.driver) {
-                document.querySelector(`input[name="queue_driver"][value="${queue.driver}"]`)?.setAttribute('checked', true);
+                const el = document.querySelector(`input[name="queue_driver"][value="${queue.driver}"]`);
+                if (el) el.checked = true;
             }
 
             if (cache.driver) {
-                document.querySelector(`input[name="cache_driver"][value="${cache.driver}"]`)?.setAttribute('checked', true);
+                const el = document.querySelector(`input[name="cache_driver"][value="${cache.driver}"]`);
+                if (el) el.checked = true;
             }
         } catch (error) {
             console.error('Error loading drivers:', error);
@@ -124,5 +141,5 @@
         });
     }
 </script>
-
 @endsection
+
