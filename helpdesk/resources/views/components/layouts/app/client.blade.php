@@ -11,9 +11,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HelpDesk</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
-  @if(app()->getLocale() === 'ar')
+  <!-- @if(app()->getLocale() === 'ar')
     <link rel="stylesheet" href="{{ asset('css/rtl.css') }}">
-  @endif
+  @endif -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css">
   <link
       rel="stylesheet"

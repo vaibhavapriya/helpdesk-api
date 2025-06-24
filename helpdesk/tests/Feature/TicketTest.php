@@ -1,43 +1,46 @@
 <?php
 
-use Tests\TestCase;
-use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Passport\Passport;
+use App\Models\User;
+use App\Models\Ticket;
+use Tests\TestCase;
 
-class PostTest extends TestCase
+
+class TicketTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_can_view_post()
+    /*ticket controller:: index */
+    public function test_user_can_get_paginated_tickets()
     {
-        $post = Post::factory()->create();
-        $response = $this->get(route('posts.show', $post));
-        $response->assertStatus(200);
-    }
+        // Create a user and authenticate with Passport
+        $user = User::factory()->create();
+        Passport::actingAs($user);
 
-    public function test_can_edit_post()
-    {
-        $post = Post::factory()->create();
-        $response = $this->get(route('posts.edit', $post));
-        $response->assertStatus(200);
-    }
-
-    public function test_can_update_post()
-    {
-        $post = Post::factory()->create();
-        $response = $this->put(route('posts.update', $post), [
-            'title' => 'Updated Title',
-            'body' => 'Updated body',
+        // Create some tickets for the user
+        Ticket::factory()->count(20)->create([
+            'requester_id' => $user->id
         ]);
-        $response->assertRedirect(route('posts.show', $post));
-        $this->assertDatabaseHas('posts', ['title' => 'Updated Title']);
+
+        // Act: Hit the API route
+        $response = $this->getJson('/api/mytickets');
+
+        // Assert: Check status and structure
+        $response->assertStatus(200)
+                 ->assertJsonStructure([
+                    'success',
+                    'data',
+                    'meta' => [
+                        'current_page',
+                        'next_page_url',
+                        'per_page',
+                        'prev_page_url',
+                    ]
+                 ]);
+
+        // Optional: Check data count
+        $this->assertCount(15, $response->json('data')); // simplePaginate(15)
     }
 
-    public function test_can_delete_post()
-    {
-        $post = Post::factory()->create();
-        $response = $this->delete(route('posts.destroy', $post));
-        $response->assertRedirect(route('posts.index'));
-        $this->assertDatabaseMissing('posts', ['id' => $post->id]);
-    }
 }
