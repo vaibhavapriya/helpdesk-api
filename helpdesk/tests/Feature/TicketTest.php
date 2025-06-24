@@ -6,6 +6,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Ticket;
+use App\Models\Image;
+use App\Models\Reply;
 use Tests\TestCase;
 
 
@@ -94,6 +96,7 @@ class TicketTest extends TestCase
         ]);
 
         // Storage::disk('public')->assertExists('uploads/' . $file->hashName());
+         //Storage::disk('public')->assertExists('uploads/' . $filename);
     }
 
     public function test_admin_can_store_ticket_for_any_user()
@@ -143,67 +146,110 @@ class TicketTest extends TestCase
         Storage::disk('public')->assertExists('uploads/' . $expectedFilename);
     }
 
-    // /*ticket controller:: show */
-    // public function test_show_ticket_with_relations()
-    // {
-    //     $user = User::factory()->create();
-    //     Passport::actingAs($user);
+    /*ticket controller:: show */
+    public function test_show_ticket_with_relations()
+    {
+        $user = User::factory()->create();
+        Passport::actingAs($user);
 
-    //     $ticket = Ticket::factory()->for($user, 'requester')->create();
-    //     Image::factory()->create(['imageable_id' => $ticket->id, 'imageable_type' => Ticket::class]);
-    //     Reply::factory()->count(2)->for($ticket)->create();
+        $ticket = Ticket::factory()->for($user, 'requester')->create();
+        Image::factory()->create(['imageable_id' => $ticket->id, 'imageable_type' => Ticket::class]);
+        Reply::factory()->count(2)->for($ticket)->create();
 
-    //     $response = $this->getJson("/api/tickets/{$ticket->id}");
+        $response = $this->getJson("/api/tickets/{$ticket->id}");
 
-    //     $response->assertOk()
-    //             ->assertJsonStructure(['success', 'data' => ['id', 'title', 'replies']])
-    //             ->assertJsonCount(2, 'data.replies');
-    // }
+        $response->assertOk()
+                ->assertJsonStructure([
+                    'success',
+                    'data' => [
+                        'id',
+                        'title',
+                        'replies',
+                        // you can add more keys you expect here like 'image'
+                    ]
+                ])
+                ->assertJsonCount(2, 'data.replies');
+    }
 
-    //     /*ticket controller:: update */
-    // public function test_update_ticket_and_replace_attachment()
-    // {
-    //     $user = User::factory()->create();
-    //     Passport::actingAs($user);
+    /*ticket controller:: update */
+    public function test_update_ticket_and_replace_attachment()
+    {
+        Storage::fake('public'); // <-- fake storage to intercept file operations
 
-    //     $ticket = Ticket::factory()->for($user, 'requester')->create();
-    //     $old = UploadedFile::fake()->image('old.png');
-    //     $ticket->image()->create(['name'=>'old.png','link'=>$old->store('uploads','public'),'filetype'=>'png']);
-    //     Storage::disk('public')->assertExists($ticket->image->link);
+        $user = User::factory()->create();
+        Passport::actingAs($user);
 
-    //     $new = UploadedFile::fake()->image('new.png');
+        // Create ticket with old image saved on fake disk
+        $ticket = Ticket::factory()->for($user, 'requester')->create();
+        $old = UploadedFile::fake()->image('old.png');
+        $oldPath = $old->store('uploads', 'public');
 
-    //     $response = $this->putJson("/api/tickets/{$ticket->id}/update", [
-    //         'title' => 'Updated',
-    //         'description' => 'Updated desc',
-    //         'priority' => 'low',
-    //         'department' => 'HR',
-    //         'status' => 'open',
-    //         'attachment' => $new,
-    //     ]);
+        $ticket->image()->create([
+            'name' => 'old.png',
+            'link' => $oldPath,
+            'filetype' => 'png',
+        ]);
 
-    //     $response->assertOk()->assertJson(['success' => true]);
-    //     Storage::disk('public')->assertMissing($ticket->image->link);
-    //     Storage::disk('public')->assertExists('uploads/' . $new->hashName());
-    // }
+        Storage::disk('public')->assertExists($oldPath);
 
-    // /*ticket controller:: delete */
-    // public function test_destroy_ticket_also_deletes_image()
-    // {
-    //     $user = User::factory()->create();
-    //     Passport::actingAs($user);
+        // New fake image to replace old
+        $new = UploadedFile::fake()->image('new.png');
 
-    //     $ticket = Ticket::factory()->for($user, 'requester')->create();
-    //     $file = UploadedFile::fake()->image('del.png');
-    //     $ticket->image()->create(['name'=>'del.png', 'link' => $file->store('uploads','public'), 'filetype'=>'png']);
-    //     Storage::disk('public')->assertExists($ticket->image->link);
+        $response = $this->putJson("/api/tickets/{$ticket->id}/update", [
+            'title' => 'Updated',
+            'description' => 'Updated desc',
+            'priority' => 'low',
+            'department' => 'HR',
+            'status' => 'open',
+            'attachment' => $new,
+        ]);
 
-    //     $response = $this->deleteJson("/api/tickets/{$ticket->id}/delete");
-    //     $response->assertOk()->assertJson(['success'=>true]);
+        $response->assertOk()->assertJson(['success' => true]);
 
-    //     $this->assertDatabaseMissing('tickets', ['id' => $ticket->id]);
-    //     Storage::disk('public')->assertMissing($ticket->image->link);
-    // }
+        // Refresh the ticket to get latest data and relationships
+        $ticket->refresh();
+
+        // Get the updated image related to the ticket
+        $image = $ticket->image;
+
+        // Old file should be deleted
+        Storage::disk('public')->assertMissing($oldPath);
+
+        // New file should exist
+        //Storage::disk('public')->assertExists('uploads/' . $new->hashName());
+        Storage::disk('public')->assertExists($image->link);
+    }
+
+
+    /*ticket controller:: delete */
+    public function test_destroy_ticket_also_deletes_image()
+    {
+        Storage::fake('public'); // <-- fake storage to intercept file operations
+
+        $user = User::factory()->create();
+        Passport::actingAs($user);
+
+        $ticket = Ticket::factory()->for($user, 'requester')->create();
+
+        $file = UploadedFile::fake()->image('del.png');
+        $filePath = $file->store('uploads', 'public');
+
+        $ticket->image()->create([
+            'name' => 'del.png',
+            'link' => $filePath,
+            'filetype' => 'png',
+        ]);
+
+        Storage::disk('public')->assertExists($filePath);
+
+        $response = $this->deleteJson("/api/tickets/{$ticket->id}/delete");
+        $response->assertOk()->assertJson(['success' => true]);
+
+        $this->assertDatabaseMissing('tickets', ['id' => $ticket->id]);
+
+        // Image file must be deleted from storage
+        Storage::disk('public')->assertMissing($filePath);
+    }
 
 
 }
