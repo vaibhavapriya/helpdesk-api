@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Laravel\Passport\Passport;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,7 +13,7 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function admin_can_get_paginated_profiles_with_filters()
     {
         Passport::actingAs(User::factory()->create(['role' => 'admin']));
@@ -40,7 +41,7 @@ class ProfileTest extends TestCase
                  ->assertJsonMissing(['firstname' => 'Bob']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_store_new_profile()
     {
         Passport::actingAs(User::factory()->create(['role' => 'admin']));
@@ -60,7 +61,7 @@ class ProfileTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'jane@example.com']);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_view_own_profile()
     {
         $user = User::factory()->create();
@@ -74,7 +75,7 @@ class ProfileTest extends TestCase
                  ->assertJsonStructure(['success', 'data' => ['id', 'firstname', 'lastname']]);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_update_profile()
     {
         $user = User::factory()->create();
@@ -98,7 +99,7 @@ class ProfileTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_user_and_profile()
     {
         Passport::actingAs(User::factory()->create(['role' => 'admin']));
@@ -115,7 +116,7 @@ class ProfileTest extends TestCase
         $this->assertDatabaseMissing('profiles', ['user_id' => $user->id]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_get_user_id_and_email_list()
     {
         Passport::actingAs(User::factory()->create(['role' => 'admin']));

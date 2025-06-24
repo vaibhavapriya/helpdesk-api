@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
@@ -21,7 +22,7 @@ class ConfigTest extends TestCase
         Passport::actingAs($admin);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_list_mail_configurations()
     {
         MailConfig::factory()->count(3)->create();
@@ -35,7 +36,7 @@ class ConfigTest extends TestCase
                  ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_store_mail_configuration()
     {
         $payload = [
@@ -55,7 +56,7 @@ class ConfigTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_update_mail_configuration_active_status()
     {
         $m1 = MailConfig::factory()->create(['active' => true]);
@@ -70,7 +71,7 @@ class ConfigTest extends TestCase
         $this->assertDatabaseHas('mailconfigs', ['id' => $m2->id, 'active' => true]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_delete_mail_configuration()
     {
         $mail = MailConfig::factory()->create();
@@ -83,7 +84,7 @@ class ConfigTest extends TestCase
         $this->assertDatabaseMissing('mailconfigs', ['id' => $mail->id]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_and_set_queue_driver()
     {
         $getResponse = $this->getJson('/api/admin/queue-driver');
@@ -93,7 +94,7 @@ class ConfigTest extends TestCase
         $setResponse->assertOk()->assertJson(['driver' => 'sync']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_and_set_cache_driver()
     {
         $getResponse = $this->getJson('/api/admin/cache-driver');
