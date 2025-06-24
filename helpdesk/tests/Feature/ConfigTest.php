@@ -49,7 +49,7 @@ class ConfigTest extends TestCase
         $response->assertStatus(200)
                  ->assertJson(['success' => true]);
 
-        $this->assertDatabaseHas('mail_configs', [
+        $this->assertDatabaseHas('mailconfigs', [
             'mail_from_name' => 'Test Sender',
             'mail_from_address' => 'test@example.com',
         ]);
@@ -66,8 +66,8 @@ class ConfigTest extends TestCase
         $response->assertOk()
                  ->assertJson(['success' => true]);
 
-        $this->assertDatabaseHas('mail_configs', ['id' => $m1->id, 'active' => false]);
-        $this->assertDatabaseHas('mail_configs', ['id' => $m2->id, 'active' => true]);
+        $this->assertDatabaseHas('mailconfigs', ['id' => $m1->id, 'active' => false]);
+        $this->assertDatabaseHas('mailconfigs', ['id' => $m2->id, 'active' => true]);
     }
 
     /** @test */
@@ -80,7 +80,7 @@ class ConfigTest extends TestCase
         $response->assertOk()
                  ->assertJson(['status' => 'success']);
 
-        $this->assertDatabaseMissing('mail_configs', ['id' => $mail->id]);
+        $this->assertDatabaseMissing('mailconfigs', ['id' => $mail->id]);
     }
 
     /** @test */
