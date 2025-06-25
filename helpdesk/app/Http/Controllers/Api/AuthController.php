@@ -73,7 +73,6 @@ class AuthController extends Controller
             'success' => true,
             'data' => [
                 'msg' => "User registered successfully",
-                'user' => $user, // Optional: expose necessary fields only
             ],
         ]);
         

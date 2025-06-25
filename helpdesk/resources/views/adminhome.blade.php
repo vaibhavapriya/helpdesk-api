@@ -25,17 +25,17 @@
               </a>
             </div>
 
-            <!-- Example Card 2
+            <!-- Example Card 2 -->
             <div class="col-md-4 mb-4">
-              <a href="mytickets" class="text-decoration-none text-dark">
+              <a href="{{url('/admin/tickets?status=Closed')}}"  class="text-decoration-none text-dark">
                 <div class="card shadow-sm">
                   <div class="card-body d-flex align-items-center">
-                    <i class="fas fa-ticket-alt fa-2x text-success me-3"></i>
-                    <h5 class="mb-0">My Tickets</h5>
+                    <i class="fas fa-ticket-alt fa-2x text-dark me-3"></i>
+                    <h5 class="mb-0">Closed Tickets</h5>
                   </div>
                 </div>
               </a>
-            </div> -->
+            </div>
 
             <!-- Example Card 2
             <div class="col-md-4 mb-4">
