@@ -7,10 +7,11 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
-
+use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\SendForgotPasswordMail;
+use App\Models\Ticket;
 
 class AuthTest extends TestCase
 {
@@ -199,7 +200,8 @@ class AuthTest extends TestCase
                 ->assertJson(['error' => 'Invalid token or email.']);
     }
 
-    public function test_reset_password_validation_errors()
+    #[Test]
+    public function reset_password_validation_errors()
     {
         $response = $this->postJson('/api/reset-password', [
             // missing all fields
@@ -207,6 +209,28 @@ class AuthTest extends TestCase
 
         $response->assertStatus(422)
                 ->assertJsonValidationErrors(['email', 'token', 'password']);
+    }
+
+    #[Test]
+    public function rolemiddleware_works()
+    {
+        $admin = User::factory()->create(['role' => 'client']);
+        Passport::actingAs($admin);
+
+        Ticket::factory()->create([
+            'title' => 'Network Issue',
+            'status' => 'open'
+        ]);
+
+        Ticket::factory()->create([
+            'title' => 'Server Downtime',
+            'status' => 'closed'
+        ]);
+
+        $response = $this->getJson('/api/admin/tickets?query=Network&status=open');
+
+        $response->assertStatus(403)
+                ->assertJsonFragment(['message' => 'Unauthorized.']);
     }
 
 }

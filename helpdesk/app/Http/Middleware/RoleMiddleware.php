@@ -14,15 +14,20 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next,$role): Response
+
+    public function handle(Request $request, Closure $next, $role): Response
     {
-        if(Auth::check() && Auth::user()->role=== $role){
+        $user = Auth::guard('api')->user(); // Passport uses the 'api' guard
+
+        if ($user && $user->role === $role) {
             return $next($request);
         }
-        else{
-            abort(304,'unauthorize');
-        }
+
+        // Use 403 Forbidden or 401 Unauthorized
+        return response()->json(['message' => 'Unauthorized.'], 403);
     }
+
+
 }
 // Auth::check();
 // Auth::user();
@@ -65,3 +70,12 @@ class RoleMiddleware
 //     // ...
 //     'requester.or.admin' => \App\Http\Middleware\EnsureUserIsRequesterOrAdmin::class,
 // ];app/Http/Kernel.php:
+    // public function handle(Request $request, Closure $next,$role): Response
+    // {
+    //     if(Auth::check() && Auth::user()->role=== $role){
+    //         return $next($request);
+    //     }
+    //     else{
+    //         abort(304,'unauthorize');
+    //     }
+    // }
