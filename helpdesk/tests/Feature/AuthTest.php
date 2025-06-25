@@ -8,6 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\SendForgotPasswordMail;
+
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
@@ -122,5 +126,87 @@ class AuthTest extends TestCase
 
         $this->assertTrue(Hash::check('newpassword123', $user->fresh()->password));
     }
+
+    #[Test]
+    public function forgot_password_sends_email()
+    {
+        Queue::fake(); // Prevent actual job dispatching
+
+        $user = User::factory()->create();
+
+        $response = $this->postJson('/api/forgot-password', [
+            'email' => $user->email,
+        ]);
+
+        $response->assertStatus(200)
+                ->assertJson(['message' => 'Password reset link sent.']);
+
+        // Assert the job was dispatched
+        Queue::assertPushed(SendForgotPasswordMail::class, function ($job) use ($user) {
+            return $job->user->is($user) && !empty($job->token);
+        });
+    }
+
+    #[Test]
+    public function forgot_password_fails_with_invalid_email()
+    {
+        $response = $this->postJson('/api/forgot-password', [
+            'email' => 'notfound@example.com',
+        ]);
+
+        $response->assertStatus(422) // validation error
+                ->assertJsonValidationErrors(['email']);
+    }
+
+    #[Test]
+    public function reset_password_with_valid_token()
+    {
+        $user = User::factory()->create();
+
+        // Generate token for user
+        $token = Password::createToken($user);
+
+        $newPassword = 'newsecurepassword';
+
+        $response = $this->postJson('/api/reset-password', [
+            'email' => $user->email,
+            'token' => $token,
+            'password' => $newPassword,
+            'password_confirmation' => $newPassword,
+        ]);
+
+        $response->assertStatus(200)
+                ->assertJson(['message' => 'Password reset successful.']);
+
+        // Assert password was updated
+        $this->assertTrue(Hash::check($newPassword, $user->fresh()->password));
+    }
+
+    #[Test]
+    public function reset_password_fails_with_invalid_token()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->postJson('/api/reset-password', [
+            'email' => $user->email,
+            'token' => 'invalid-token',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertStatus(400)
+                ->assertJson(['error' => 'Invalid token or email.']);
+    }
+
+    public function test_reset_password_validation_errors()
+    {
+        $response = $this->postJson('/api/reset-password', [
+            // missing all fields
+        ]);
+
+        $response->assertStatus(422)
+                ->assertJsonValidationErrors(['email', 'token', 'password']);
+    }
+
 }
 
