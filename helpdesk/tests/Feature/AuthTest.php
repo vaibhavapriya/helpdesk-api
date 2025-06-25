@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
-class AuthControllerTest extends TestCase
+class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -60,22 +60,22 @@ class AuthControllerTest extends TestCase
                  ->assertJsonStructure(['meta' => ['token', 'token_type']]);
     }
 
-    // #[Test]
-    // public function user_cannot_login_with_invalid_credentials()
-    // {
-    //     $user = User::factory()->create([
-    //         'email' => 'jane@example.com',
-    //         'password' => bcrypt('correct-password'),
-    //     ]);
+    #[Test]
+    public function user_cannot_login_with_invalid_credentials()
+    {
+        $user = User::factory()->create([
+            'email' => 'jane@example.com',
+            'password' => bcrypt('correct-password'),
+        ]);
 
-    //     $response = $this->postJson('/api/login', [
-    //         'email' => 'jane@example.com',
-    //         'password' => 'wrong-password',
-    //     ]);
+        $response = $this->postJson('/api/login', [
+            'email' => 'jane@example.com',
+            'password' => 'wrong-password',
+        ]);
 
-    //     $response->assertStatus(401)
-    //              ->assertJson(['message' => 'Invalid credentials.']);
-    // }
+        $response->assertStatus(401)
+                 ->assertJson(['message' => 'Invalid credentials.']);
+    }
 
     #[Test]
     public function user_cannot_update_password_with_wrong_old_password()

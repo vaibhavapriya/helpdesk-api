@@ -100,6 +100,20 @@ class TicketTest extends TestCase
         Storage::disk('public')->assertExists('uploads/' . $expectedFilename);
     }
 
+    public function test_client_cannot_store_empty_ticket()
+    {
+        Storage::fake('public');
+        $user = User::factory()->create(['role' => 'client']);
+        Passport::actingAs($user);
+
+        $response = $this->postJson('/api/mytickets', [
+            // Sending empty data
+        ]);
+
+        $response->assertStatus(422) // Validation failed
+                ->assertJsonValidationErrors(['title', 'description', 'priority', 'department']);
+    }
+
     public function test_admin_can_store_ticket_for_any_user()
     {
         Storage::fake('public');
@@ -172,6 +186,33 @@ class TicketTest extends TestCase
                 ->assertJsonCount(2, 'data.replies');
     }
 
+    public function test_client_cannot_view_others_ticket()
+    {
+        $user = User::factory()->create(['role' => 'client']);
+        Passport::actingAs($user);
+
+        $otherUser = User::factory()->create();
+        $ticket = Ticket::factory()->for($otherUser, 'requester')->create();
+
+        $response = $this->getJson("/api/tickets/{$ticket->id}");
+
+        $response->assertForbidden(); // 403
+    }
+
+    public function test_admin_can_view_any_ticket()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        Passport::actingAs($admin);
+
+        $otherUser = User::factory()->create();
+        $ticket = Ticket::factory()->for($otherUser, 'requester')->create();
+
+        $response = $this->getJson("/api/tickets/{$ticket->id}");
+
+        $response->assertOk()
+                ->assertJsonStructure(['success', 'data' => ['id', 'title', 'replies']]);
+    }
+
     /*ticket controller:: update */
     public function test_update_ticket_and_replace_attachment()
     {
@@ -220,7 +261,6 @@ class TicketTest extends TestCase
         //Storage::disk('public')->assertExists('uploads/' . $new->hashName());
         Storage::disk('public')->assertExists($image->link);
     }
-
 
     /*ticket controller:: delete */
     public function test_destroy_ticket_also_deletes_image()

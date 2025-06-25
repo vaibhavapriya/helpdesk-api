@@ -59,7 +59,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Reply::class, 'replier_id');
     }
-        public function isAdmin(): bool
+    public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
