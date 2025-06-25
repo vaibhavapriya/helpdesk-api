@@ -340,6 +340,4 @@ class TicketTest extends TestCase
                 ]);
     }
 
-
-
 }

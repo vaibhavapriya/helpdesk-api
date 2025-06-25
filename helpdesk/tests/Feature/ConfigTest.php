@@ -85,7 +85,15 @@ class ConfigTest extends TestCase
     }
 
     #[Test]
-    public function it_can_get_and_set_queue_driver()
+    public function it_can_get_queue_driver()
+    {
+        $getResponse = $this->getJson('/api/admin/queue-driver');
+        $getResponse->assertOk()->assertJsonStructure(['driver']);
+
+    }
+
+    #[Test]
+    public function it_can_set_queue_driver()
     {
         $getResponse = $this->getJson('/api/admin/queue-driver');
         $getResponse->assertOk()->assertJsonStructure(['driver']);
@@ -95,7 +103,14 @@ class ConfigTest extends TestCase
     }
 
     #[Test]
-    public function it_can_get_and_set_cache_driver()
+    public function it_can_get_cache_driver()
+    {
+        $getResponse = $this->getJson('/api/admin/cache-driver');
+        $getResponse->assertOk()->assertJsonStructure(['driver']);
+    }
+
+    #[Test]
+    public function it_can_set_cache_driver()
     {
         $getResponse = $this->getJson('/api/admin/cache-driver');
         $getResponse->assertOk()->assertJsonStructure(['driver']);
