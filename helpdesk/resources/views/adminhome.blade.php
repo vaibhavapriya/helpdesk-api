@@ -2,7 +2,7 @@
 @section('content')
           <div class="row">
             <!-- Example Card 1 -->
-            <div class="col-md-4 mb-4">
+            <div class="col-md-6 mb-4">
               <a  href="{{ route('profile') }}" class="text-decoration-none text-dark">
                 <div class="card shadow-sm">
                   <div class="card-body d-flex align-items-center">
@@ -14,7 +14,7 @@
             </div>
 
             <!-- Example Card 2 -->
-            <div class="col-md-4 mb-4">
+            <div class="col-md-6 mb-4">
               <a href="{{url('/admin/tickets?status=Open')}}" class="text-decoration-none text-dark">
                 <div class="card shadow-sm">
                   <div class="card-body d-flex align-items-center">
@@ -25,12 +25,12 @@
               </a>
             </div>
 
-            <!-- Example Card 2 -->
-            <div class="col-md-4 mb-4">
+            <!-- Example Card 3 -->
+            <div class="col-md-6 mb-4">
               <a href="{{url('/admin/tickets?status=Closed')}}"  class="text-decoration-none text-dark">
                 <div class="card shadow-sm">
                   <div class="card-body d-flex align-items-center">
-                    <i class="fas fa-ticket-alt fa-2x text-dark me-3"></i>
+                    <i class="fas fa-ticket-alt fa-2x text-danger me-3"></i>
                     <h5 class="mb-0">Closed Tickets</h5>
                   </div>
                 </div>
@@ -49,8 +49,8 @@
               </a>
             </div> -->
 
-            <!-- Example Card 3 -->
-            <div class="col-md-4 mb-4">
+            <!-- Example Card 4 -->
+            <div class="col-md-6 mb-4">
               <a href="{{ route('errorlog') }}"  class="text-decoration-none text-dark">
                 <div class="card shadow-sm">
                   <div class="card-body d-flex align-items-center">
