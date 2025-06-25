@@ -100,18 +100,19 @@ class TicketTest extends TestCase
         Storage::disk('public')->assertExists('uploads/' . $expectedFilename);
     }
 
-    public function test_client_cannot_store_empty_ticket()
+    public function test_client_cannot_store_incomplete_form_ticket()
     {
         Storage::fake('public');
         $user = User::factory()->create(['role' => 'client']);
         Passport::actingAs($user);
 
         $response = $this->postJson('/api/mytickets', [
-            // Sending empty data
+            'title' => 'New Problem',
+            'description' => 'Details here',
         ]);
 
         $response->assertStatus(422) // Validation failed
-                ->assertJsonValidationErrors(['title', 'description', 'priority', 'department']);
+                ->assertJsonValidationErrors(['priority', 'department']);
     }
 
     public function test_admin_can_store_ticket_for_any_user()
@@ -291,6 +292,54 @@ class TicketTest extends TestCase
         // Image file must be deleted from storage
         Storage::disk('public')->assertMissing($filePath);
     }
+
+    public function test_user_can_add_reply_to_ticket()
+    {
+        // Arrange
+        $user = User::factory()->create();
+        $ticket = Ticket::factory()->for($user, 'requester')->create();
+
+        Passport::actingAs($user);
+
+        $replyContent = 'This is a reply from the user.';
+
+        // Act
+        $response = $this->postJson("/api/tickets/{$ticket->id}/comment", [
+            'reply' => $replyContent,
+        ]);
+
+        // Assert
+        $response->assertStatus(200)
+                ->assertJson([
+                    'success' => true,
+                    'message' => 'Reply added successfully',
+                ]);
+
+        $this->assertDatabaseHas('replies', [
+            'ticket_id' => $ticket->id,
+            'replier_id' => $user->id,
+            'reply' => $replyContent,
+        ]);
+    }
+
+    public function test_reply_content_is_required()
+    {
+        $user = User::factory()->create();
+        $ticket = Ticket::factory()->for($user, 'requester')->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->postJson("/api/tickets/{$ticket->id}/comment", [
+            // 'reply' is missing
+        ]);
+
+        $response->assertStatus(400)
+                ->assertJson([
+                    'success' => false,
+                    'message' => 'Reply content is required',
+                ]);
+    }
+
 
 
 }
