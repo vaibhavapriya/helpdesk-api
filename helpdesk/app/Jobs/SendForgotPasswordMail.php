@@ -24,7 +24,15 @@ class SendForgotPasswordMail implements ShouldQueue
         $this->user = $user;
         $this->token = $token;
     }
+    public function getUser()
+    {
+        return $this->user;
+    }
 
+    public function getToken()
+    {
+        return $this->token;
+    }
     public function handle(): void
     {
         MailHelper::setMailConfig();

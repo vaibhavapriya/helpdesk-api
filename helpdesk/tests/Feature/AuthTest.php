@@ -143,8 +143,9 @@ class AuthTest extends TestCase
 
         // Assert the job was dispatched
         Queue::assertPushed(SendForgotPasswordMail::class, function ($job) use ($user) {
-            return $job->user->is($user) && !empty($job->token);
+            return $job->getUser()->is($user) && !empty($job->getToken());
         });
+
     }
 
     #[Test]
