@@ -22,15 +22,22 @@ class AuthController extends Controller
     {
         $request->validated();//only data validated by request
 
-        // Attempt login
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'message' => 'Invalid credentials.'
-            ], 401);
+        // // Attempt login
+        // if (!Auth::attempt($request->only('email', 'password'))) {
+        //     return response()->json([
+        //         'message' => 'Invalid credentials.'
+        //     ], 401);
+        // }
+
+        // /** @var User $user */
+        // $user = Auth::user();
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        /** @var User $user */
-        $user = Auth::user();
+        $token = $user->createToken('auth_token')->accessToken;
 
         // Create token (with optional ability scopes)
         $token = $user->createToken('auth_token')->accessToken;
@@ -43,6 +50,7 @@ class AuthController extends Controller
             ],
         ]);
     }
+
 
     public function register(RegisterRequest $request)
     {
