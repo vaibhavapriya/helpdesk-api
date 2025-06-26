@@ -45,7 +45,22 @@ class TicketTest extends DuskTestCase
                     ->assertSee('Edit Ticket'); // or some label on the edit page
         });
     }
+    public function test_client_can_delete_ticket()
+    {
+        $this->browse(function (Browser $browser) {
 
+            $browser->visit('/tickets')
+                    ->pause(3000) // allow time for tickets to load
+                    ->script("document.querySelector('.btn-delete')?.click();");
+
+            $browser->pause(2000)
+                    ->assertDialogOpened('Deleted') // if your JS uses alert('Deleted')
+                    ->acceptDialog();
+
+            // Optional: Check the ticket is gone by checking the DOM or message
+            // $browser->assertDontSee('Ticket Title');
+        });
+    }
      public function test_client_can_create_ticket()
     {
         $this->browse(function (Browser $browser) {
@@ -61,21 +76,5 @@ class TicketTest extends DuskTestCase
                 ->press('Submit');
         });
     }
-    // public function test_client_can_delete_ticket()
-    // {
-    //     $this->browse(function (Browser $browser) {
-
-    //         $browser->visit('/tickets')
-    //                 ->pause(3000) // allow time for tickets to load
-    //                 ->script("document.querySelector('.btn-delete')?.click();");
-
-    //         $browser->pause(2000)
-    //                 ->assertDialogOpened('Deleted') // if your JS uses alert('Deleted')
-    //                 ->acceptDialog();
-
-    //         // Optional: Check the ticket is gone by checking the DOM or message
-    //         // $browser->assertDontSee('Ticket Title');
-    //     });
-    // }
 
 }
