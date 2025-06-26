@@ -153,7 +153,7 @@ class LangController extends Controller
             'submit_ticket' => __('nav.submit_ticket'),
             'knowledgebase' => __('nav.knowledgebase'),
             'my_ticket' => __('nav.my_ticket'),
-            'register' => __('register'),
+            'register' => __('nav.register'),
         ]);
     }
     public function getFaqByLanguage($lang)
