@@ -16,7 +16,7 @@ class HomeTest extends DuskTestCase
                 ->assertPresent('#link-submit-ticket') // check for navbar link(header)
                 ->assertPresent('#link-knowledgebase')
                 ->assertVisible('#home-cards-container .card h5')//check the tag exists
-                ->assertSee('register') // fallback or real translation
+                ->assertSee('Register') // fallback or real translation
                 ->assertSee('Submit Ticket') // fallback: text check
                 ->assertSee('Knowledgebase') // might be translated
                 ->screenshot('home-page');

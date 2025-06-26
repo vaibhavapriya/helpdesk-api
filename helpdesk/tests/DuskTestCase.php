@@ -9,6 +9,10 @@ use Illuminate\Support\Collection;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
 
+use Laravel\Dusk\Browser;
+use App\Models\User;
+
+
 abstract class DuskTestCase extends BaseTestCase
 {
     use CreatesApplication;
@@ -47,4 +51,21 @@ abstract class DuskTestCase extends BaseTestCase
             )
         );
     }
+
+    protected function loginAsUser(Browser $browser, User $user = null)
+    {
+        $user = $user ?? User::factory()->create([
+            'password' => bcrypt('password'),
+        ]);
+
+        $browser->visit('/login')
+                ->type('email', $user->email)
+                ->type('password', 'password')
+                ->press('Login')
+                ->pause(1000)
+                ->assertPathIs('/');
+        
+        return $user;
+    }
+
 }

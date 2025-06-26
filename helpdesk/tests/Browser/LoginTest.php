@@ -41,7 +41,6 @@ class LoginTest extends DuskTestCase
                 ->press('Login')
                 ->pause(2000)
                 ->assertPathIs('/');
-            $browser->visit('/logout');
         });
     }
     /**
