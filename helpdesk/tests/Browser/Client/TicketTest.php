@@ -20,6 +20,46 @@ class TicketTest extends DuskTestCase
 
         });
     }
+    public function test_client_can_view_single_ticket()
+    {
+        $this->browse(function (Browser $browser) {
+            // Assume there's at least one ticket and visit it
+            $browser->visit('/tickets')
+                    ->waitFor('a[href^="/tickets/"]', 5)
+                    ->click('a[href^="/tickets/"]') // clicks the first ticket link
+                    ->pause(1000)
+                    ->assertSee('Description')   // or something unique to the show page
+                    ->assertPathBeginsWith('/tickets/');
+        });
+    }
 
-    
+    public function test__client_can_edit_ticket()
+    {
+        $this->browse(function (Browser $browser) {
+            
+            $browser->visit('/tickets')
+                    ->pause(2000) // wait for JS to render
+                    ->clickLink('Edit') // or use ->click('.btn-warning') if button
+                    ->assertPathBeginsWith('/tickets/') // confirm navigation to edit
+                    ->assertSee('Edit Ticket'); // or some label on the edit page
+        });
+    }
+
+    // public function test_client_can_delete_ticket()
+    // {
+    //     $this->browse(function (Browser $browser) {
+
+    //         $browser->visit('/tickets')
+    //                 ->pause(3000) // allow time for tickets to load
+    //                 ->script("document.querySelector('.btn-delete')?.click();");
+
+    //         $browser->pause(2000)
+    //                 ->assertDialogOpened('Deleted') // if your JS uses alert('Deleted')
+    //                 ->acceptDialog();
+
+    //         // Optional: Check the ticket is gone by checking the DOM or message
+    //         // $browser->assertDontSee('Ticket Title');
+    //     });
+    // }
+
 }
