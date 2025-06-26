@@ -41,4 +41,22 @@ class ProfileTest extends DuskTestCase
                     ->assertSee('Email'); // Or other field from the profile
         });
     }
+    public function test_admin_can_view_and_edit_user_profile()
+    {
+        $this->browse(function (Browser $browser) {
+            $admin = User::where('role', 'admin')->first(); 
+            $browser->visit("/admin/profile/{$admin->id}")
+                ->pause(2000) // wait for JS to load
+                ->assertSee('User Profile')
+                ->assertSee($admin->email)
+                ->click('#editBtn')
+                ->pause(500)
+                ->type('#lastname', 'UpdatedLast')
+                ->press('#saveBtn')
+                ->pause(2000)
+                ->assertDialogOpened('Profile updated successfully!')
+                ->acceptDialog()
+                ->assertSee('UpdatedLast');
+        });
+    }
 }
