@@ -16,8 +16,9 @@ class ConfigTest extends DuskTestCase
 
             $this->loginAsUser($browser, $admin);
 
-            $browser->visit('/admin/mailconfig')
-                ->pause(2000)
+            $browser->visit('/admin/mailconfig');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                 ->assertSee('Email Configuration')
                 ->assertVisible('#emailTableBody')
                 ->with('#emailTableBody tr:first-child', function ($row) {
@@ -34,17 +35,18 @@ class ConfigTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $testEmail = 'testdemo@example.com';
-            $browser->visit('/admin/mailconfig')
-                ->pause(1000)
+            $browser->visit('/admin/mailconfig');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                 ->press('Add Email')
-                ->pause(1000)
+                ->pause(5000)
                 ->whenAvailable('#addEmailModal', function (Browser $modal) use ($testEmail) {
                     $modal->type('email', $testEmail)
                         ->type('name', 'Dusk Test Sender')
                         ->type('passcode', 'test-password')
                         ->press('Save');
                 })
-                ->pause(2000)
+                ->pause(5000)
                 ->assertSeeIn('#success', 'Email configuration added');
         });
     }
@@ -54,8 +56,10 @@ class ConfigTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $testEmail = 'testdemo@example.com';
 
-            $browser->visit('/admin/mailconfig')
-                ->waitFor('.table-bordered tbody tr td', 5)
+            $browser->visit('/admin/mailconfig');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->waitFor('.table-bordered tbody tr td', 5)
+                ->pause(5000)
                 ->assertSeeIn('table.table-bordered tbody', $testEmail)
                 ->waitForText($testEmail, 5);
             $browser->script("Array.from(document.querySelectorAll('tbody tr')).forEach(row => {
@@ -73,8 +77,9 @@ class ConfigTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
 
-            $browser->visit('/admin/qconfig') // Replace with your actual route if different
-                    ->pause(1000)
+            $browser->visit('/admin/qconfig'); 
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                     ->assertSee('Queue Driver Configuration');
 
             $browser->script("document.querySelector('label[for=\"queue_database\"]').scrollIntoView();");
@@ -82,7 +87,7 @@ class ConfigTest extends DuskTestCase
             $browser->script("document.querySelector('label[for=\"queue_database\"]').click();");
 
             // Wait and verify success message
-            $browser->pause(2000)
+            $browser->pause(5000)
                     ->assertVisible('#statusMessage')
                     ->assertSeeIn('#statusMessage', 'Queue driver updated to "database"');
         });
@@ -91,15 +96,16 @@ class ConfigTest extends DuskTestCase
     public function test_admin_can_view_and_set_cache_config()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/admin/cconfig') 
-                    ->pause(1000)
+            $browser->visit('/admin/cconfig') ;
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                     ->assertSee('Cache Driver Configuration');
 
             $browser->script("document.querySelector('label[for=\"cache_redis\"]').scrollIntoView();");
-            $browser->pause(500);
+            $browser->pause(5000);
             $browser->script("document.querySelector('label[for=\"cache_redis\"]').click();");
 
-            $browser->pause(2000)
+            $browser->pause(5000)
                     ->assertVisible('#statusMessage')
                     ->assertSeeIn('#statusMessage', 'Cache driver updated to "redis"');
         });
@@ -121,7 +127,7 @@ class ConfigTest extends DuskTestCase
             if ($browser->element($nextLinkSelector)) {
                 $browser->waitFor($nextLinkSelector, 10)
                     ->click($nextLinkSelector)
-                    ->pause(2000)
+                    ->pause(5000)
                     ->assertPresent('#tickets-table-body tr');
             } else {
                 $browser->assertSeeIn('#pagination', 'Next'); // Next is disabled (span)

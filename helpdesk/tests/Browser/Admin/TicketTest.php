@@ -71,7 +71,6 @@ class TicketTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $admin = User::where('role', 'admin')->first();
             $targetUser = User::where('email', 'vaibhavapriyand@gmail.com')->first();
-            $this->loginAsUser($browser, $admin);
             $browser->visit('/admin/tickets/create');
             $this->injectTestMarker($browser, __FUNCTION__);
             $browser->pause(5000) // Wait for form JS

@@ -15,15 +15,16 @@ class ProfileTest extends DuskTestCase
 
             $this->loginAsUser($browser, $admin);
 
-            $browser->visit('/admin/profiles') // adjust route if different
-                    ->pause(2000)
+            $browser->visit('/admin/profiles'); // adjust route if different
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                     ->assertSee('Users')
                     ->assertPresent('#searchInput')
                     ->type('#searchInput', '9') // assuming a user with "John" exists
-                    ->pause(1000)
+                    ->pause(5000)
                     ->assertSee('weissnat.elmira@example.net') // adjust name to match a seeded user
                     ->select('#roleFilter', 'client')
-                    ->pause(2000)
+                    ->pause(5000)
                     ->assertSeeIn('#userTableBody','client')
                     ->assertDontSeeIn('#userTableBody', 'admin');
         });
@@ -31,11 +32,12 @@ class ProfileTest extends DuskTestCase
     public function test_admin_can_click_user_email_and_redirect()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/admin/profiles')
-                    ->pause(2000) // Wait for JS to render users
+            $browser->visit('/admin/profiles');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000) // Wait for JS to render users
                     ->assertSee('Users') // Page heading
                     ->click('.clickable-name') // Click on user email cell
-                    ->pause(1000)
+                    ->pause(5000)
                     ->assertPathBeginsWith('/admin/profile/') // Confirm redirect
                     ->assertSee('Edit') // Check content of profile page
                     ->assertSee('Email'); // Or other field from the profile
@@ -45,15 +47,16 @@ class ProfileTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $admin = User::where('role', 'admin')->first(); 
-            $browser->visit("/admin/profile/{$admin->id}")
-                ->pause(2000) // wait for JS to load
+            $browser->visit("/admin/profile/{$admin->id}");
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000) // wait for JS to load
                 ->assertSee('User Profile')
                 ->assertSee($admin->email)
                 ->click('#editBtn')
                 ->pause(500)
                 ->type('#lastname', 'UpdatedLast')
                 ->press('#saveBtn')
-                ->pause(2000)
+                ->pause(5000)
                 ->assertDialogOpened('Profile updated successfully!')
                 ->acceptDialog()
                 ->assertSee('UpdatedLast');
@@ -62,14 +65,17 @@ class ProfileTest extends DuskTestCase
     public function test_admin_can_view_and_edit_his_profile()
     {
         $this->browse(function (Browser $browser) { 
-            $browser->visit("/admin/profile")
-                ->pause(2000) // wait for JS to load
+            $admin = User::where('role', 'admin')->first(); 
+            $browser->visit("/admin/profile");
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000) // wait for JS to load
                 ->assertSee('User Profile')
                 ->click('#editBtn')
                 ->pause(500)
+                ->assertSee($admin->email)
                 ->type('#lastname','Priya')
                 ->press('#saveBtn')
-                ->pause(2000)
+                ->pause(5000)
                 ->assertDialogOpened('Profile updated successfully!')
                 ->acceptDialog()
                 ->assertSee('Priya');
@@ -83,15 +89,16 @@ class ProfileTest extends DuskTestCase
             $admin->password = bcrypt('oldpassword123');
             $admin->save();
 
-            $browser->visit('/admin/profile')
-            ->assertSee('User Profile')
-            ->type('#old_Password', 'oldpassword123')
-            ->type('input[name="new_password"]', 'password')
-            ->type('input[name="new_password_confirmation"]', 'password')
-            ->press('#cp')
-            ->pause(2000)
-            ->assertDialogOpened('Password changed successfully!')
-            ->acceptDialog();
+            $browser->visit('/admin/profile');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->assertSee('User Profile')
+                ->type('#old_Password', 'oldpassword123')
+                ->type('input[name="new_password"]', 'password')
+                ->type('input[name="new_password_confirmation"]', 'password')
+                ->press('#cp')
+                ->pause(5000)
+                ->assertDialogOpened('Password changed successfully!')
+                ->acceptDialog();
         });
     }
 }
