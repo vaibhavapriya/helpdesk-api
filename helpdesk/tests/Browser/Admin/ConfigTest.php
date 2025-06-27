@@ -70,17 +70,42 @@ class ConfigTest extends DuskTestCase
     }
 
 
-    // public function test_admin_can_view_and_set_queue_config()
-    // {
-    //     $this->browse(function (Browser $browser) {
-    //     });
-    // }
+    public function test_admin_can_view_and_set_queue_config()
+    {
+        $this->browse(function (Browser $browser) {
 
-    // public function test_admin_can_view_and_set_cache_config()
-    // {
-    //     $this->browse(function (Browser $browser) {
-    //     });
-    // }
+            $browser->visit('/admin/qconfig') // Replace with your actual route if different
+                    ->pause(1000)
+                    ->assertSee('Queue Driver Configuration');
+
+            $browser->script("document.querySelector('label[for=\"queue_redis\"]').scrollIntoView();");
+            $browser->pause(500);
+            $browser->script("document.querySelector('label[for=\"queue_redis\"]').click();");
+
+            // Wait and verify success message
+            $browser->pause(2000)
+                    ->assertVisible('#statusMessage')
+                    ->assertSeeIn('#statusMessage', 'Queue driver updated to "redis"');
+        });
+    }
+
+
+    public function test_admin_can_view_and_set_cache_config()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/admin/cconfig') 
+                    ->pause(1000)
+                    ->assertSee('Cache Driver Configuration');
+
+            $browser->script("document.querySelector('label[for=\"cache_redis\"]').scrollIntoView();");
+            $browser->pause(500);
+            $browser->script("document.querySelector('label[for=\"cache_redis\"]').click();");
+
+            $browser->pause(2000)
+                    ->assertVisible('#statusMessage')
+                    ->assertSeeIn('#statusMessage', 'Cache driver updated to "redis"');
+        });
+    }
 
     // public function test_admin_can_view_errorlogs()
     // {
