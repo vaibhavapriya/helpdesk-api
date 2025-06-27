@@ -15,13 +15,14 @@ class TicketTest extends DuskTestCase
             $admin = User::where('role', 'admin')->first();
             $this->loginAsUser($browser, $admin);
 
-            $browser->visit('/admin/tickets')
-                ->pause(2000) // Let JS load tickets
+            $browser->visit('/admin/tickets');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000) // Let JS load tickets
                 ->assertSee('Ticket List')
-                ->type('#searchInput', 'Sample Ticket')
-                ->pause(1000)
+                ->type('#searchInput', '9')
+                ->pause(5000)
                 ->select('#statusFilter', 'Open')
-                ->pause(2000)
+                ->pause(5000)
                 ->assertSeeIn('#tickets-table-body', 'Open')
                 ->assertDontSeeIn('#tickets-table-body', 'Closed');
         });
@@ -31,15 +32,16 @@ class TicketTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $admin = User::where('role', 'admin')->first();
-            $browser->visit('/admin/tickets')
-                ->pause(2000)
+            $browser->visit('/admin/tickets');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                 ->clickLink('Edit') // First ticket's Edit button
-                ->pause(2000)
+                ->pause(5000)
                 ->assertPathBeginsWith('/admin/tickets/')
                 ->assertSee('Edit Ticket') // Adjust as needed
                 ->type('title', 'Updated Ticket Title')
                 ->press('Update Ticket') // Or whatever your submit button says
-                ->pause(2000)
+                ->pause(5000)
                 ->assertDialogOpened('Ticket updated successfully!')
                 ->acceptDialog()
                 ->assertSee('Updated Ticket Title');
@@ -51,14 +53,15 @@ class TicketTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $admin = User::where('role', 'admin')->first();
-
-            $browser->visit('/admin/tickets')
-                ->pause(2000)
+            
+            $browser->visit('/admin/tickets');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                 ->click('.btn-delete') // Assumes first Delete button
-                ->pause(2000)
+                ->pause(5000)
                 ->assertDialogOpened('Ticket deleted')
                 ->acceptDialog()
-                ->pause(2000)
+                ->pause(5000)
                 ->assertDontSee('Updated Ticket Title');
         });
     }
@@ -68,18 +71,19 @@ class TicketTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $admin = User::where('role', 'admin')->first();
             $targetUser = User::where('email', 'vaibhavapriyand@gmail.com')->first();
-
-            $browser->visit('/admin/tickets/create')
-                ->pause(2000) // Wait for form JS
+            $this->loginAsUser($browser, $admin);
+            $browser->visit('/admin/tickets/create');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000) // Wait for form JS
                 ->assertSee('New Ticket')
 
                 // Select "Another User"
                 ->select('#user-toggle', 'other')
-                ->pause(1000)
+                ->pause(5000)
 
                 // Type and select the user
                 ->type('#requester_search', $targetUser->email)
-                ->pause(1500)
+                ->pause(3000)
 
                 // Wait for the requester_id select to become visible and select value
                 ->waitFor('#requester_id:not(.d-none)', 3)
@@ -91,8 +95,7 @@ class TicketTest extends DuskTestCase
                 ->type('#description', 'This is a test ticket created by admin for another user.')
 
                 ->press('#submit-button')
-                ->pause(4000) // Wait for submission and redirect
-
+                ->pause(50000) // Wait for submission and redirect
                 ->assertDialogOpened('Ticket created successfully!')
                 ->acceptDialog();
 

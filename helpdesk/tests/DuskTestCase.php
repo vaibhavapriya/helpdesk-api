@@ -68,4 +68,34 @@ abstract class DuskTestCase extends BaseTestCase
         return $user;
     }
 
+    protected function injectTestMarker(Browser $browser, string $testName)
+    {
+        $escapedName = addslashes($testName);
+
+        $browser->script("
+            const existing = document.getElementById('CATION');
+            if (!existing) {
+                const marker = document.createElement('div');
+                marker.id = 'CATION';
+                marker.textContent = '$escapedName';
+                Object.assign(marker.style, {
+                    position: 'fixed',
+                    bottom: '10px',
+                    right: '10px',
+                    background: 'linear-gradient(135deg, #007BFF, #00C851)',
+                    color: '#fff',
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    fontFamily: 'monospace',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                    zIndex: 9999,
+                    opacity: 0.9
+                });
+                document.body.appendChild(marker);
+            }
+        ");
+    }
+
+
 }
