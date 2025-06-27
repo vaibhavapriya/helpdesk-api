@@ -53,6 +53,7 @@ class TicketTest extends DuskTestCase
     }
 
     public function test_admin_can_delete_ticket()
+    // $browser->click("#userTableBody tr[data-id='{$userIdToDelete}'] button.btn-danger");
     {
         $this->browse(function (Browser $browser) {
             $admin = User::where('role', 'admin')->first();
