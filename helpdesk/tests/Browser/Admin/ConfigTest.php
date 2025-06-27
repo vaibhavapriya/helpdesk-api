@@ -69,7 +69,6 @@ class ConfigTest extends DuskTestCase
         });
     }
 
-
     public function test_admin_can_view_and_set_queue_config()
     {
         $this->browse(function (Browser $browser) {
@@ -89,7 +88,6 @@ class ConfigTest extends DuskTestCase
         });
     }
 
-
     public function test_admin_can_view_and_set_cache_config()
     {
         $this->browse(function (Browser $browser) {
@@ -107,9 +105,28 @@ class ConfigTest extends DuskTestCase
         });
     }
 
-    // public function test_admin_can_view_errorlogs()
-    // {
-    //     $this->browse(function (Browser $browser) {
-    //     });
-    // }
+    public function test_admin_can_view_error_logs_and_paginate()
+    {
+        $this->browse(function (Browser $browser) {
+
+            $browser->visit('/admin/errorlogs')
+                ->waitFor('#ticketTable', 10)
+                ->assertVisible('#ticketTable')
+                ->assertPresent('#tickets-table-body tr')
+                ->assertVisible('#pagination');
+
+            // Check if active "Next" link exists
+            $nextLinkSelector = '//ul[@id="pagination"]//a[contains(text(), "Next")]';
+
+            if ($browser->element($nextLinkSelector)) {
+                $browser->waitFor($nextLinkSelector, 10)
+                    ->click($nextLinkSelector)
+                    ->pause(2000)
+                    ->assertPresent('#tickets-table-body tr');
+            } else {
+                $browser->assertSeeIn('#pagination', 'Next'); // Next is disabled (span)
+            }
+        });
+    }
+
 }
