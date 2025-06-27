@@ -14,8 +14,9 @@ class ProfileTest extends DuskTestCase
             $user = User::first() ;
             $user = $this->loginAsUser($browser, $user);
 
-            $browser->visit('/myProfile')
-                    ->waitForText('User Profile', 5)
+            $browser->visit('/myProfile');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->waitForText('User Profile', 5)
                     ->pause(2000)
                     ->assertSee('User Profile')
                     ->assertVisible('#firstname_display')
@@ -28,12 +29,14 @@ class ProfileTest extends DuskTestCase
     public function test_client_can_edit_and_save_profile()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/myProfile')
-                    ->pause(2000)
+            $browser->visit('/myProfile');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(2000)
                     ->waitForText('User Profile', 5)
                     ->waitFor('#editBtn', 5)
+                    ->scrollTo('#editBtn')
                     ->press('#editBtn')
-                    ->pause(500)
+                    ->pause(5000)
 
                     // Fill in the form fields
                     ->type('#firstname', 'NewFirst')
@@ -42,13 +45,15 @@ class ProfileTest extends DuskTestCase
                     ->type('#email', 'autumn00@example.org')
 
                     // Submit the form
+                    ->scrollTo('#saveBtn')
                     ->press('#saveBtn')
-                    ->pause(2000)
+                    ->pause(5000)
 
                     ->assertDialogOpened('Profile updated successfully!') // if your JS uses alert('Deleted')
                     ->acceptDialog()
 
                     // Confirm values are updated
+                    ->pause(5000)
                     ->assertSee('NewFirst')
                     ->assertSee('NewLast')
                     ->assertSee('1234567890')

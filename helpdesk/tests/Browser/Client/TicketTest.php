@@ -15,7 +15,9 @@ class TicketTest extends DuskTestCase
             $user = User::first() ;
             $user = $this->loginAsUser($browser, $user);
 
-            $browser->visit('/tickets')
+            $browser->visit('/tickets');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                 ->assertSee('Ticket List');
 
         });
@@ -24,12 +26,15 @@ class TicketTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             // Assume there's at least one ticket and visit it
-            $browser->visit('/tickets')
-                    ->waitFor('a[href^="/tickets/"]', 5)
-                    ->click('a[href^="/tickets/"]') // clicks the first ticket link
-                    ->pause(1000)
-                    ->assertSee('Description')   // or something unique to the show page
-                    ->assertPathBeginsWith('/tickets/');
+            $browser->visit('/tickets');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
+                ->waitFor('a[href^="/tickets/"]', 5)
+                ->click('a[href^="/tickets/"]') // clicks the first ticket link
+                ->pause(7000)
+                ->assertSee('Description')   // or something unique to the show page
+                ->assertPathBeginsWith('/tickets/');
+
         });
     }
 
@@ -37,28 +42,44 @@ class TicketTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             
-            $browser->visit('/tickets')
-                    ->pause(2000) // wait for JS to render
+            $browser->visit('/tickets');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000) // wait for JS to render
                     ->clickLink('Edit') // or use ->click('.btn-warning') if button
                     ->assertPathBeginsWith('/tickets/') // confirm navigation to edit
                     ->waitFor('#edit-ticket-form', 5)
-                    ->assertSee('Edit Ticket'); // or some label on the edit page
+                    ->pause(5000)
+                    ->assertSee('Edit Ticket') // or some label on the edit page
+                    ->waitFor('#edit-ticket-form')
+                    ->assertVisible('#title')
+                    ->type('#title', 'Updated Ticket Title')
+                    ->type('#description', 'Updated ticket description')
+                    ->select('#priority', 'medium')
+                    ->type('#department', 'Support')
+                    ->select('#status', 'open')
+                    ->pause(5000)
+                    ->scrollTo('#btn-update')
+                    ->press('#btn-update')
+                    ->pause(5000)
+                    ->assertDialogOpened('Ticket updated successfully!')
+                    ->acceptDialog()
+                    ->pause(5000)
+                    ->assertValue('#title', 'Updated Ticket Title');
         });
     }
     public function test_client_can_delete_ticket()
     {
         $this->browse(function (Browser $browser) {
 
-            $browser->visit('/tickets')
-                    ->pause(3000) // allow time for tickets to load
+            $browser->visit('/tickets');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000) // allow time for tickets to load
                     ->script("document.querySelector('.btn-delete')?.click();");
 
-            $browser->pause(2000)
+            $browser->pause(5000)
                     ->assertDialogOpened('Deleted') // if your JS uses alert('Deleted')
-                    ->acceptDialog();
+                    ->acceptDialog()->pause(5000);
 
-            // Optional: Check the ticket is gone by checking the DOM or message
-            // $browser->assertDontSee('Ticket Title');
         });
     }
      public function test_client_can_create_ticket()
@@ -66,14 +87,17 @@ class TicketTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
 
             // Visit the create ticket page and fill the form
-            $browser->visit('/tickets/create') // Adjust route as needed
-                ->pause(1000)
+            $browser->visit('/tickets/create'); // Adjust route as needed
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(1000)
                 ->type('title', 'Sample Ticket')
                 ->select('priority', 'medium')
                 ->type('department', 'Support')
                 ->type('description', 'This is a test ticket created by Dusk.')
+                ->pause(7000)
                 // ->attach('attachment', __DIR__.'/files/sample.jpg') // Make sure this file exists
                 ->press('Submit');
+            $browser->visit('/tickets');
         });
     }
 
