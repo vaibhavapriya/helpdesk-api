@@ -26,7 +26,7 @@ class ConfigTest extends DuskTestCase
                     $row->script("document.querySelector('label.custom-control-label').click()");
                 })
                 ->pause(3000)
-                ->assertSeeIn('#success', 'Email deleted successfully.');
+                ->assertSeeIn('#success', 'Email marked as active.');
         });
     }
 
@@ -77,14 +77,14 @@ class ConfigTest extends DuskTestCase
                     ->pause(1000)
                     ->assertSee('Queue Driver Configuration');
 
-            $browser->script("document.querySelector('label[for=\"queue_redis\"]').scrollIntoView();");
+            $browser->script("document.querySelector('label[for=\"queue_database\"]').scrollIntoView();");
             $browser->pause(500);
-            $browser->script("document.querySelector('label[for=\"queue_redis\"]').click();");
+            $browser->script("document.querySelector('label[for=\"queue_database\"]').click();");
 
             // Wait and verify success message
             $browser->pause(2000)
                     ->assertVisible('#statusMessage')
-                    ->assertSeeIn('#statusMessage', 'Queue driver updated to "redis"');
+                    ->assertSeeIn('#statusMessage', 'Queue driver updated to "database"');
         });
     }
 

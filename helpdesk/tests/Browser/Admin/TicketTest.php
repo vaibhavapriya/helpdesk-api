@@ -91,7 +91,7 @@ class TicketTest extends DuskTestCase
                 ->type('#description', 'This is a test ticket created by admin for another user.')
 
                 ->press('#submit-button')
-                ->pause(10000) // Wait for submission and redirect
+                ->pause(4000) // Wait for submission and redirect
 
                 ->assertDialogOpened('Ticket created successfully!')
                 ->acceptDialog();
