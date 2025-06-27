@@ -44,6 +44,7 @@ class ConfigTest extends DuskTestCase
                     $modal->type('email', $testEmail)
                         ->type('name', 'Dusk Test Sender')
                         ->type('passcode', 'test-password')
+                        ->pause(5000)
                         ->press('Save');
                 })
                 ->pause(5000)
@@ -134,5 +135,6 @@ class ConfigTest extends DuskTestCase
             }
         });
     }
+
 
 }

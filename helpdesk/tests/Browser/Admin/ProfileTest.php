@@ -51,8 +51,8 @@ class ProfileTest extends DuskTestCase
             $this->injectTestMarker($browser, __FUNCTION__);
             $browser->pause(5000) // wait for JS to load
                 ->assertSee('User Profile')
-                ->assertSee($admin->email)
-                ->click('#editBtn')
+                ->assertSee($admin->email);
+            $browser->scrollTo('#editBtn')->click('#editBtn')
                 ->pause(500)
                 ->type('#lastname', 'UpdatedLast')
                 ->press('#saveBtn')
@@ -70,9 +70,9 @@ class ProfileTest extends DuskTestCase
             $this->injectTestMarker($browser, __FUNCTION__);
             $browser->pause(5000) // wait for JS to load
                 ->assertSee('User Profile')
-                ->click('#editBtn')
+                ->assertSee($admin->email);
+            $browser->scrollTo('#editBtn')->click('#editBtn')
                 ->pause(500)
-                ->assertSee($admin->email)
                 ->type('#lastname','Priya')
                 ->press('#saveBtn')
                 ->pause(5000)
