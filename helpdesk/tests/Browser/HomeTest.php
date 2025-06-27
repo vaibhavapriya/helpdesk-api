@@ -11,7 +11,9 @@ class HomeTest extends DuskTestCase
     public function test_home(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('/');
+            $this->injectTestMarker($browser, __FUNCTION__);
+            $browser->pause(5000)
                 ->waitFor('#home-cards-container', 5) // wait for container
                 ->assertPresent('#link-submit-ticket') // check for navbar link(header)
                 ->assertPresent('#link-knowledgebase')
