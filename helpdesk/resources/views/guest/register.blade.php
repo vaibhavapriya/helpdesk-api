@@ -87,8 +87,7 @@
         document.getElementById('langSwitcher')?.addEventListener('change', async (e) => {
             await loadLocaleContent();
         });
-    });
-    document.getElementById('registerForm').addEventListener('submit', async function (e) {
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
         // Clear previous errors
@@ -138,6 +137,8 @@
             alert('Server error. Try again later.');
         }
     });
+    });
+
 
 </script>
 @endsection
