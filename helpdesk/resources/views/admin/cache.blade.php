@@ -10,14 +10,16 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Select</th>
                         <th>Driver</th>
                         <th>Description</th>
+                        <th>Select</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach(['file', 'redis', 'array', 'database'] as $driver)
                     <tr>
+                        <td>{{ ucfirst($driver) }}</td>
+                        <td>{{ ucfirst($driver) }} cache driver</td>
                         <td>
                             <div class="custom-control custom-switch">
                                 <input type="radio"
@@ -29,8 +31,6 @@
                                 <label class="custom-control-label" for="cache_{{ $driver }}"></label>
                             </div>
                         </td>
-                        <td>{{ ucfirst($driver) }}</td>
-                        <td>{{ ucfirst($driver) }} cache driver</td>
                     </tr>
                     @endforeach
                 </tbody>

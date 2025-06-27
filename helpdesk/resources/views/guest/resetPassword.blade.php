@@ -34,6 +34,7 @@
     </div>
     </div>
 </div>
+
 <script>
     const isAuthenticated = !!localStorage.getItem('auth_token');
     const token = 'Bearer ' + localStorage.getItem('auth_token')?? null;
@@ -73,58 +74,57 @@
         await loadLocaleContent();
     });
     });
-document.getElementById('reset-password-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
+    document.getElementById('reset-password-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-    // Clear previous errors and message
-    ['email-error', 'password-error', 'form-message'].forEach(id => {
-        document.getElementById(id).innerText = '';
-    });
-
-    const token = document.getElementById('token').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const password_confirmation = document.getElementById('password_confirmation').value;
-
-    try {
-        const response = await fetch('/api/reset-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': token,
-                'X-CSRF-TOKEN': '{{ csrf_token() }}' // include if CSRF middleware is enabled on API route
-            },
-            body: JSON.stringify({ token, email, password, password_confirmation })
+        // Clear previous errors and message
+        ['email-error', 'password-error', 'form-message'].forEach(id => {
+            document.getElementById(id).innerText = '';
         });
 
-        const data = await response.json();
+        const token = document.getElementById('token').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const password_confirmation = document.getElementById('password_confirmation').value;
 
-        if (!response.ok) {
-            // Show validation errors
-            if(data.errors) {
-                if(data.errors.email) {
-                    document.getElementById('email-error').innerText = data.errors.email[0];
+        try {
+            const response = await fetch('/api/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': token,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // include if CSRF middleware is enabled on API route
+                },
+                body: JSON.stringify({ token, email, password, password_confirmation })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Show validation errors
+                if(data.errors) {
+                    if(data.errors.email) {
+                        document.getElementById('email-error').innerText = data.errors.email[0];
+                    }
+                    if(data.errors.password) {
+                        document.getElementById('password-error').innerText = data.errors.password[0];
+                    }
+                } else if (data.message) {
+                    document.getElementById('form-message').innerText = data.message;
                 }
-                if(data.errors.password) {
-                    document.getElementById('password-error').innerText = data.errors.password[0];
-                }
-            } else if (data.message) {
-                document.getElementById('form-message').innerText = data.message;
+            } else {
+                // Success
+                document.getElementById('form-message').innerText = data.message || 'Password reset successful.';
+                // Optionally redirect after delay
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
             }
-        } else {
-            // Success
-            document.getElementById('form-message').innerText = data.message || 'Password reset successful.';
-            // Optionally redirect after delay
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 2000);
+        } catch (error) {
+            document.getElementById('form-message').innerText = 'An unexpected error occurred.';
         }
-    } catch (error) {
-        document.getElementById('form-message').innerText = 'An unexpected error occurred.';
-    }
-});
+    });
 </script>
-
 
 @endsection

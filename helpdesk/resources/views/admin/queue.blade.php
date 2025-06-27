@@ -10,14 +10,16 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Select</th>
                         <th>Driver</th>
                         <th>Description</th>
+                        <th>Select</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach(['sync', 'database', 'redis'] as $driver)
                     <tr>
+                        <td>{{ ucfirst($driver) }}</td>
+                        <td>{{ ucfirst($driver) }} queue driver</td>
                         <td>
                             <div class="custom-control custom-switch">
                                 <input type="radio"
@@ -29,8 +31,6 @@
                                 <label class="custom-control-label" for="queue_{{ $driver }}"></label>
                             </div>
                         </td>
-                        <td>{{ ucfirst($driver) }}</td>
-                        <td>{{ ucfirst($driver) }} queue driver</td>
                     </tr>
                     @endforeach
                 </tbody>
