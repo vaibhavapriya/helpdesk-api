@@ -27,12 +27,6 @@ class TicketTest extends DuskTestCase
         });
     }
 
-    public function test_admin_can_view_ticket()
-    {
-        $this->browse(function (Browser $browser) {
-        });
-    }
-
     public function test_admin_can_edit_ticket()
     {
         $this->browse(function (Browser $browser) {
