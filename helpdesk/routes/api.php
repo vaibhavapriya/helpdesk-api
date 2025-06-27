@@ -76,6 +76,7 @@ Route::group(['middleware'=>['web','lang']],function () {
     Route::get('/header', [LangController::class, 'getHeader']);
     Route::get('/homegrid', [LangController::class, 'getHomegrid']);
     Route::get('/getLogin', [LangController::class, 'getlogin']);
+    Route::get('/getRegister', [LangController::class, 'getregister']);
 });
 
 

@@ -172,6 +172,18 @@ class LangController extends Controller
 
         return response()->json($auth);
     }
+    public function getregister(){
+        return response()->json([
+            'register' =>__('auth.register'),
+            'first_name' =>__('auth.first_name'),
+            'last_name' =>__('auth.last_name'),
+            'email_address' =>__('auth.email_address'),
+            'password' =>__('auth.password'),
+            'confirm_password' =>__('auth.confirm_password'),
+            'already_have_account' =>__('auth.already_have_account'),
+            'login' =>__('auth.login'),
+        ]);
+    }
     public function getFaqByLanguage($lang)
     {
         app()->setLocale($lang); // Set locale dynamically
@@ -187,7 +199,6 @@ class LangController extends Controller
 
         return response()->json($faqs);
     }
-
 
 
 }

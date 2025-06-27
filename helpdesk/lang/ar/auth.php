@@ -7,4 +7,8 @@ return [
     'forgot_password' => 'هل نسيت كلمة المرور؟',
     'dont_have_account' => 'ليس لديك حساب؟',
     'register' => 'تسجيل',
+    'first_name' => "الاسم الأول",
+    'last_name' => "اسم العائلة",
+    'confirm_password' => "تأكيد كلمة المرور",
+    'already_have_account' => "هل لديك حساب بالفعل؟",
 ];
