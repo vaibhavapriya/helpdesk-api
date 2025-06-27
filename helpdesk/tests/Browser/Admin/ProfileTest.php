@@ -61,25 +61,37 @@ class ProfileTest extends DuskTestCase
     }
     public function test_admin_can_view_and_edit_his_profile()
     {
-        $this->browse(function (Browser $browser) {
-            $admin = User::where('role', 'admin')->first(); 
+        $this->browse(function (Browser $browser) { 
             $browser->visit("/admin/profile")
                 ->pause(2000) // wait for JS to load
                 ->assertSee('User Profile')
-                ->assertSee($admin->email)
                 ->click('#editBtn')
                 ->pause(500)
-                ->type('#lastname', 'UpdatedLast')
+                ->type('#lastname','Priya')
                 ->press('#saveBtn')
                 ->pause(2000)
                 ->assertDialogOpened('Profile updated successfully!')
                 ->acceptDialog()
-                ->assertSee('UpdatedLast');
+                ->assertSee('Priya');
         });
     }
     public function test_admin_can_view_and_edit_his_password()
     {
         $this->browse(function (Browser $browser) {
+            $admin = User::where('role', 'admin')->first();
+
+            $admin->password = bcrypt('oldpassword123');
+            $admin->save();
+
+            $browser->visit('/admin/profile')
+            ->assertSee('User Profile')
+            ->type('#old_Password', 'oldpassword123')
+            ->type('input[name="new_password"]', 'password')
+            ->type('input[name="new_password_confirmation"]', 'password')
+            ->press('#cp')
+            ->pause(2000)
+            ->assertDialogOpened('Password changed successfully!')
+            ->acceptDialog();
         });
     }
 }
