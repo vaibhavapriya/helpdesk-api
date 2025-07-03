@@ -27,7 +27,7 @@
 
 
 <script>
-    const ticketId = "{{ $ticket->id ?? request()->route('id') }}";
+    const ticketId = "{{ request()->route('id') }}";
     const apiBase = `http://127.0.0.1:8000/api/tickets/${ticketId}`;
     const token = 'Bearer ' + localStorage.getItem('auth_token');
     const lang = localStorage.getItem('lang') || 'en';

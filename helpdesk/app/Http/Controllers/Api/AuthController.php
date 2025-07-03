@@ -37,7 +37,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials.' ], 401);
         }
         
-        $token = $user->createToken('auth_token')->accessToken;
+        $token = $user->createToken('auth_token')->accessToken;//plainTextToken;
 
         // Return user resource + token
         return (new UserResource($user))->additional([
@@ -163,8 +163,9 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         //$request->user()->currentAccessToken()->delete();
-        $accessToken = $request->user()->token();
-        $accessToken->delete();
+        //$accessToken = $request->user()->token();
+        //$accessToken->delete();
+         $request->user()->token()->revoke();
         return response()->json(['message' => 'Logged out']);
     }
 

@@ -26,7 +26,7 @@ class Ticket extends Model
         return $this->belongsTo(User::class, 'requester_id');
     }
 
-        public function replies()
+    public function replies()
     {
         return $this->hasMany(Reply::class);
     }

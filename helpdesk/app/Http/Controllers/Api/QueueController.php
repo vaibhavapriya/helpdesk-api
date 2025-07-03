@@ -19,7 +19,7 @@ class QueueController extends Controller
 
     public function setDriver(Request $request)
     {
-        $driver = $request->input('driver');
+        $driver = $request->input('driver');//or $request->driver;
         $allowed = array_keys(config('queue.connections'));
 
         if (!in_array($driver, $allowed)) {

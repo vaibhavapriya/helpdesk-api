@@ -49,7 +49,7 @@ class User extends Authenticatable
     }
     public function profile()
     {
-        return $this->hasOne(Profile::class, 'user_id');
+        return $this->hasOne(Profile::class);//no need to pass because it is , 'user_id'
     }
     public function tickets()
     {
